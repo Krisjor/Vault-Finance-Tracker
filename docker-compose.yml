@@ -1,0 +1,72 @@
+# Brings up the full Personal Finance Tracker stack:
+#   - PostgreSQL 15 (data)
+#   - Flask backend on :5000 (api)
+#   - React frontend on :5173 (web)
+#
+# Usage:
+#   docker-compose up -d
+#   docker-compose exec backend flask --app run db upgrade
+#   docker-compose exec backend flask --app run seed-demo   # optional
+#
+# Then open http://localhost:5173
+
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: finance_tracker_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: finance_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - finance_tracker_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d finance_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: finance_tracker_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/finance_tracker
+      SECRET_KEY: change-me-in-real-production
+      JWT_SECRET_KEY: change-me-too-in-real-production
+      FRONTEND_URL: http://localhost:5173
+      DEFAULT_CURRENCY: ALL
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "flask --app run db upgrade &&
+             gunicorn --bind 0.0.0.0:5000 --workers 2 'run:app'"
+
+  frontend:
+    build: ./frontend
+    container_name: finance_tracker_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE: http://localhost:5000/api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  finance_tracker_data:

@@ -1,0 +1,2461 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finance Tracker · Live Demo</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind via CDN (dev-mode JIT) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['"Instrument Serif"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            cream: { 50: '#FBF9F4', 100: '#F5F1E8', 200: '#EDE6D3' },
+            ink: {
+              50:  '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0',
+              300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b',
+              600: '#475569', 700: '#334155', 800: '#1e293b',
+              900: '#0f172a', 950: '#020617',
+            },
+            ember: { 400: '#F59E0B', 500: '#D97706', 600: '#B45309' },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body {
+      font-feature-settings: 'cv02','cv03','cv04','cv11';
+      background: #FBF9F4;
+    }
+    .display-serif { font-family: 'Instrument Serif', Georgia, serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    ::selection { background: rgba(245, 158, 11, 0.35); }
+
+    /* Card style */
+    .card { background: #fff; border: 1px solid #EDE6D3; border-radius: 16px; padding: 24px; }
+    .card-tight { background: #fff; border: 1px solid #EDE6D3; border-radius: 14px; padding: 16px; }
+    .ring-amber:focus { outline: none; box-shadow: 0 0 0 3px rgba(245,158,11,0.35); }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-weight: 500; font-size: 14px; transition: all 0.15s; cursor: pointer; border: none; }
+    .btn-primary { background: #0f172a; color: #fff; }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-secondary { background: #fff; color: #0f172a; border: 1px solid #EDE6D3; }
+    .btn-secondary:hover { background: #FBF9F4; }
+    .btn-ghost { background: transparent; color: #475569; }
+    .btn-ghost:hover { background: #F5F1E8; color: #0f172a; }
+    .btn-amber { background: #F59E0B; color: #1e293b; font-weight: 600; }
+    .btn-amber:hover { background: #D97706; color: #fff; }
+    .btn-danger { background: #DC2626; color: #fff; }
+    .btn-danger:hover { background: #B91C1C; }
+
+    /* Inputs */
+    .input, .select, .textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid #EDE6D3; background: #fff; color: #0f172a;
+      font-size: 14px; transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .input:focus, .select:focus, .textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(15,23,42,0.08); border-color: #0f172a; }
+    .label { display: block; font-size: 13px; font-weight: 500; color: #334155; margin-bottom: 6px; }
+
+    /* Sidebar nav links */
+    .navlink { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; color: #475569; font-weight: 500; font-size: 14px; transition: all 0.12s; cursor: pointer; }
+    .navlink:hover { background: #F5F1E8; color: #0f172a; }
+    .navlink.active { background: #0f172a; color: #FBF9F4; }
+    .navlink.active svg { color: #F59E0B; }
+
+    /* Misc */
+    .stat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; }
+    .stat-value { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: #0f172a; line-height: 1.1; font-variant-numeric: tabular-nums; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 16px; background: #0f172a; color: #fff; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 100; animation: slideUpFade 0.25s ease-out; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .toast-success { background: #047857; }
+    .toast-error { background: #DC2626; }
+    @keyframes slideUpFade { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 50; display: grid; place-items: center; animation: fadeIn 0.18s ease-out; padding: 16px; }
+    .modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.25); animation: pop 0.22s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    /* Progress bar */
+    .progress-track { background: #F5F1E8; border-radius: 999px; overflow: hidden; height: 8px; }
+    .progress-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease-out; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: padding-box; }
+
+    /* Subtle "demo badge" */
+    .demo-pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px;
+      background: rgba(245, 158, 11, 0.15); color: #B45309; border-radius: 999px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .dot { width: 6px; height: 6px; background: #F59E0B; border-radius: 999px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  </style>
+</head>
+
+<body class="font-sans text-ink-900">
+  <div id="root"></div>
+
+  <!-- Load via ESM from esm.sh — works from file:// with no CORS issues -->
+  <!-- Babel standalone via jsDelivr (sets CORS: * on all responses) -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.10/babel.min.js"></script>
+  <script type="module">
+    document.getElementById('root').innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Inter,sans-serif;color:#64748b;gap:16px">' +
+      '<div style="width:32px;height:32px;border:3px solid #EDE6D3;border-top-color:#0f172a;border-radius:50%;animation:spin 0.8s linear infinite"></div>' +
+      '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>' +
+      '<span style="font-size:14px">Loading Finance Tracker…</span>' +
+      '</div>';
+
+    function showError(msg) {
+      document.getElementById('root').innerHTML =
+        '<div style="padding:40px;font-family:monospace;font-size:13px;color:#DC2626;background:#FFF5F5;border:1px solid #FCA5A5;border-radius:8px;margin:40px;line-height:1.8">' +
+        '<strong style="font-size:15px">Could not load app</strong><br><br>' + msg +
+        '<br><br><span style="color:#475569">Open browser console (F12) for more detail.</span></div>';
+    }
+
+    try {
+      const [React, ReactDOMPkg, RechartsM] = await Promise.all([
+        import('https://esm.sh/react@18'),
+        import('https://esm.sh/react-dom@18/client'),
+        import('https://esm.sh/recharts@2.12.7'),
+      ]);
+
+      // Expose as globals so the JSX app code can reference them
+      // esm.sh named exports are directly on the module object
+      window.React    = React.default ? React.default : React;
+      // Merge named exports onto React global (useState etc.) 
+      Object.assign(window.React, React);
+      window.ReactDOM = ReactDOMPkg;
+      window.Recharts = RechartsM;
+
+      // Babel is already loaded as a UMD global via the <script> tag above
+      const appScript = document.getElementById('app-source').textContent;
+      const compiled  = Babel.transform(appScript, { presets: ['react'] }).code;
+      // eslint-disable-next-line no-new-func
+      new Function(compiled)();
+    } catch(e) {
+      console.error(e);
+      showError(e.message);
+    }
+  </script>
+
+  <script id="app-source" type="text/jsx">
+    const { useState, useEffect, useMemo, useReducer, useRef, createContext, useContext } = React;
+    const {
+      LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+      AreaChart, Area, ResponsiveContainer, XAxis, YAxis,
+      CartesianGrid, Tooltip, Legend,
+    } = Recharts;
+
+    // ====================================================================
+    // STORAGE LAYER
+    // --------------------------------------------------------------------
+    // State persists in localStorage so a page refresh keeps the current
+    // data. "Clear data" restores the seeded fixtures — the baseline state
+    // every demo session starts from.
+    // ====================================================================
+
+    const STORAGE_KEY = 'finance_tracker_demo_v1';
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) { /* corrupt → reseed */ }
+      return seed();
+    }
+
+    function saveState(state) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function uid() { return Math.random().toString(36).slice(2, 10); }
+
+    // ====================================================================
+    // SEED DATA
+    // --------------------------------------------------------------------
+    // 90 days of realistic Albanian-context transactions: a salary on the 1st,
+    // groceries, restaurant visits, transport, utilities, etc.  This gives the
+    // dashboard, reports, and budget views something interesting to render.
+    // ====================================================================
+
+    function seed() {
+      const today = new Date();
+      const dStr = (d) => d.toISOString().slice(0, 10);
+      const daysAgo = (n) => { const d = new Date(today); d.setDate(d.getDate() - n); return d; };
+      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+      const accounts = [
+        { id: 'a_chk', name: 'BKT Checking', type: 'checking', currency: 'ALL',
+          initialBalance: 85000, color: '#3B82F6' },
+        { id: 'a_sav', name: 'Raiffeisen Savings', type: 'savings', currency: 'ALL',
+          initialBalance: 240000, color: '#10B981' },
+        { id: 'a_cash', name: 'Cash Wallet', type: 'cash', currency: 'ALL',
+          initialBalance: 12000, color: '#F59E0B' },
+        { id: 'a_eur', name: 'Revolut (EUR)', type: 'checking', currency: 'EUR',
+          initialBalance: 450, color: '#8B5CF6' },
+      ];
+
+      const categories = [
+        { id: 'c_hous',  name: 'Housing',       type: 'expense', color: '#EF4444' },
+        { id: 'c_groc',  name: 'Groceries',     type: 'expense', color: '#F59E0B' },
+        { id: 'c_rest',  name: 'Restaurants',   type: 'expense', color: '#F97316' },
+        { id: 'c_tran',  name: 'Transport',     type: 'expense', color: '#3B82F6' },
+        { id: 'c_util',  name: 'Utilities',     type: 'expense', color: '#0EA5E9' },
+        { id: 'c_heal',  name: 'Health',        type: 'expense', color: '#EC4899' },
+        { id: 'c_ent',   name: 'Entertainment', type: 'expense', color: '#A855F7' },
+        { id: 'c_shop',  name: 'Shopping',      type: 'expense', color: '#8B5CF6' },
+        { id: 'c_edu',   name: 'Education',     type: 'expense', color: '#14B8A6' },
+        { id: 'c_sub',   name: 'Subscriptions', type: 'expense', color: '#6366F1' },
+        { id: 'c_trav',  name: 'Travel',        type: 'expense', color: '#06B6D4' },
+        { id: 'c_other', name: 'Other',         type: 'expense', color: '#6B7280' },
+        { id: 'c_sal',   name: 'Salary',        type: 'income',  color: '#10B981' },
+        { id: 'c_free',  name: 'Freelance',     type: 'income',  color: '#22C55E' },
+        { id: 'c_gift',  name: 'Gifts',         type: 'income',  color: '#A3E635' },
+        { id: 'c_inv',   name: 'Investments',   type: 'income',  color: '#84CC16' },
+      ];
+
+      // Realistic transaction patterns
+      const txns = [];
+      const merchantsByCategory = {
+        c_groc: ['Conad', 'Spar Supermarket', 'Big Market', 'Carrefour'],
+        c_rest: ['Era Restaurant', 'Mullixhiu', 'Sky Tower Café', 'Pista', 'Burger King', 'Mon Cheri'],
+        c_tran: ['Tirana Taxi', 'Bus pass', 'Fuel - Kastrati', 'Bolt ride'],
+        c_util: ['OSHEE electricity', 'UKT water', 'Vodafone internet', 'ALBtelecom mobile'],
+        c_heal: ['Pharmacy purchase', 'Doctor visit', 'Lab tests'],
+        c_ent:  ['Cinema Plaza', 'Concert tickets', 'Spotify', 'Netflix'],
+        c_shop: ['Zara', 'H&M', 'Bookstore Tirana', 'Electronics'],
+        c_sub:  ['Spotify Premium', 'Netflix', 'ChatGPT Plus', 'iCloud'],
+        c_trav: ['Air Albania', 'Hotel Tirana', 'Booking.com'],
+        c_other: ['Misc purchase', 'Donation', 'Repair'],
+        c_edu: ['Online course', 'University fee', 'Books'],
+      };
+
+      let seed = 42;
+      const rng = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+      const randInt = (lo, hi) => Math.floor(rng() * (hi - lo + 1)) + lo;
+      const choice = (arr) => arr[Math.floor(rng() * arr.length)];
+
+      for (let daysBack = 0; daysBack < 90; daysBack++) {
+        const d = daysAgo(daysBack);
+        const dateStr = dStr(d);
+
+        // Salary on the 1st
+        if (d.getDate() === 1) {
+          txns.push({
+            id: uid(), date: dateStr, type: 'income', amount: 75000,
+            currency: 'ALL', accountId: 'a_chk', categoryId: 'c_sal',
+            description: 'Monthly salary',
+          });
+        }
+
+        // Housing rent on the 5th
+        if (d.getDate() === 5) {
+          txns.push({
+            id: uid(), date: dateStr, type: 'expense', amount: 35000,
+            currency: 'ALL', accountId: 'a_chk', categoryId: 'c_hous',
+            description: 'Apartment rent',
+          });
+        }
+
+        // Utilities mid-month
+        if (d.getDate() === 12) {
+          txns.push({
+            id: uid(), date: dateStr, type: 'expense', amount: randInt(3500, 5500),
+            currency: 'ALL', accountId: 'a_chk', categoryId: 'c_util',
+            description: choice(merchantsByCategory.c_util),
+          });
+        }
+
+        // Random daily expenses
+        const numExpenses = randInt(0, 3);
+        for (let i = 0; i < numExpenses; i++) {
+          const expenseCats = ['c_groc', 'c_groc', 'c_rest', 'c_tran', 'c_shop', 'c_ent', 'c_heal', 'c_sub', 'c_other'];
+          const cat = choice(expenseCats);
+          const amountRanges = {
+            c_groc: [500, 4500],   c_rest: [800, 3500],   c_tran: [200, 1500],
+            c_shop: [1500, 8000],  c_ent:  [400, 2200],   c_heal: [500, 3000],
+            c_sub:  [500, 2000],   c_other: [300, 2000],
+          };
+          const [lo, hi] = amountRanges[cat];
+          txns.push({
+            id: uid(), date: dateStr, type: 'expense', amount: randInt(lo, hi),
+            currency: 'ALL', accountId: choice(['a_chk', 'a_cash']),
+            categoryId: cat, description: choice(merchantsByCategory[cat] || ['Purchase']),
+          });
+        }
+
+        // Occasional freelance income
+        if (daysBack % 17 === 0) {
+          txns.push({
+            id: uid(), date: dateStr, type: 'income', amount: randInt(5000, 25000),
+            currency: 'ALL', accountId: 'a_chk', categoryId: 'c_free',
+            description: 'Client invoice',
+          });
+        }
+      }
+
+      const budgets = [
+        { id: uid(), categoryId: 'c_groc',  name: 'Groceries',    amount: 25000, period: 'monthly', currency: 'ALL', startDate: dStr(monthStart), warnThreshold: 80 },
+        { id: uid(), categoryId: 'c_rest',  name: 'Restaurants',  amount: 12000, period: 'monthly', currency: 'ALL', startDate: dStr(monthStart), warnThreshold: 80 },
+        { id: uid(), categoryId: 'c_tran',  name: 'Transport',    amount: 8000,  period: 'monthly', currency: 'ALL', startDate: dStr(monthStart), warnThreshold: 80 },
+        { id: uid(), categoryId: 'c_ent',   name: 'Entertainment',amount: 6000,  period: 'monthly', currency: 'ALL', startDate: dStr(monthStart), warnThreshold: 80 },
+        { id: uid(), categoryId: 'c_shop',  name: 'Shopping',     amount: 15000, period: 'monthly', currency: 'ALL', startDate: dStr(monthStart), warnThreshold: 80 },
+      ];
+
+      const goals = [
+        { id: uid(), name: 'Emergency fund',    target: 300000, current: 185000, currency: 'ALL',
+          targetDate: dStr(new Date(today.getFullYear(), today.getMonth() + 6, 1)), color: '#10B981',
+          description: 'Six months of essential expenses set aside.' },
+        { id: uid(), name: 'New laptop',        target: 200000, current: 78000,  currency: 'ALL',
+          targetDate: dStr(new Date(today.getFullYear(), today.getMonth() + 4, 15)), color: '#F59E0B',
+          description: 'MacBook Pro upgrade.' },
+        { id: uid(), name: 'Summer trip',       target: 120000, current: 35000,  currency: 'ALL',
+          targetDate: dStr(new Date(today.getFullYear(), 6, 1)), color: '#3B82F6',
+          description: 'Two weeks in Greece with family.' },
+      ];
+
+      return {
+        user: { name: 'Demo User', email: 'demo@example.com', defaultCurrency: 'ALL' },
+        accounts, categories, transactions: txns, budgets, goals,
+      };
+    }
+
+    // ====================================================================
+    // STATE: useReducer for everything
+    // --------------------------------------------------------------------
+    // A single reducer keeps state changes auditable and serializable.
+    // Persistence is a side-effect via useEffect.
+    // ====================================================================
+
+    function reducer(state, action) {
+      switch (action.type) {
+        case 'CREATE_TXN':
+          return { ...state, transactions: [{ id: uid(), ...action.payload }, ...state.transactions] };
+        case 'UPDATE_TXN':
+          return { ...state, transactions: state.transactions.map(t =>
+            t.id === action.payload.id ? { ...t, ...action.payload } : t) };
+        case 'DELETE_TXN':
+          return { ...state, transactions: state.transactions.filter(t => t.id !== action.payload) };
+
+        case 'CREATE_ACCOUNT':
+          return { ...state, accounts: [...state.accounts, { id: uid(), ...action.payload }] };
+        case 'UPDATE_ACCOUNT':
+          return { ...state, accounts: state.accounts.map(a =>
+            a.id === action.payload.id ? { ...a, ...action.payload } : a) };
+        case 'DELETE_ACCOUNT':
+          return {
+            ...state,
+            accounts: state.accounts.filter(a => a.id !== action.payload),
+            transactions: state.transactions.filter(t => t.accountId !== action.payload),
+          };
+
+        case 'CREATE_BUDGET':
+          return { ...state, budgets: [...state.budgets, { id: uid(), ...action.payload }] };
+        case 'UPDATE_BUDGET':
+          return { ...state, budgets: state.budgets.map(b =>
+            b.id === action.payload.id ? { ...b, ...action.payload } : b) };
+        case 'DELETE_BUDGET':
+          return { ...state, budgets: state.budgets.filter(b => b.id !== action.payload) };
+
+        case 'CREATE_GOAL':
+          return { ...state, goals: [...state.goals, { id: uid(), ...action.payload }] };
+        case 'UPDATE_GOAL':
+          return { ...state, goals: state.goals.map(g =>
+            g.id === action.payload.id ? { ...g, ...action.payload } : g) };
+        case 'DELETE_GOAL':
+          return { ...state, goals: state.goals.filter(g => g.id !== action.payload) };
+        case 'CONTRIBUTE_GOAL':
+          return { ...state, goals: state.goals.map(g =>
+            g.id === action.payload.id ? { ...g, current: Math.min(g.target, g.current + action.payload.amount) } : g) };
+
+        case 'CREATE_CATEGORY':
+          return { ...state, categories: [...state.categories, { id: uid(), ...action.payload }] };
+        case 'DELETE_CATEGORY':
+          return { ...state, categories: state.categories.filter(c => c.id !== action.payload) };
+
+        case 'UPDATE_USER':
+          return { ...state, user: { ...state.user, ...action.payload } };
+
+        case 'RESET':
+          return seed();
+
+        default:
+          return state;
+      }
+    }
+
+    // ====================================================================
+    // FORMATTERS
+    // ====================================================================
+
+    const CURRENCY_LOCALES = {
+      ALL: { locale: 'sq-AL', symbol: 'L', decimals: 0 },
+      EUR: { locale: 'de-DE', symbol: '€', decimals: 2 },
+      USD: { locale: 'en-US', symbol: '$', decimals: 2 },
+      GBP: { locale: 'en-GB', symbol: '£', decimals: 2 },
+      CHF: { locale: 'de-CH', symbol: 'CHF', decimals: 2 },
+    };
+
+    function formatCurrency(amount, currency = 'ALL', { compact = false } = {}) {
+      const cfg = CURRENCY_LOCALES[currency] || CURRENCY_LOCALES.ALL;
+      const opts = {
+        style: 'decimal',
+        minimumFractionDigits: compact ? 0 : cfg.decimals,
+        maximumFractionDigits: compact ? 0 : cfg.decimals,
+      };
+      if (compact && Math.abs(amount) >= 1000) {
+        opts.notation = 'compact';
+        opts.maximumFractionDigits = 1;
+      }
+      return `${cfg.symbol}${new Intl.NumberFormat(cfg.locale, opts).format(amount)}`;
+    }
+
+    function formatDate(d, { format = 'short' } = {}) {
+      const date = typeof d === 'string' ? new Date(d) : d;
+      if (format === 'short') {
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      }
+      return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // ====================================================================
+    // SELECTORS (memoized via useMemo at call sites)
+    // ====================================================================
+
+    function accountBalance(state, accountId) {
+      const acc = state.accounts.find(a => a.id === accountId);
+      if (!acc) return 0;
+      let bal = acc.initialBalance;
+      for (const t of state.transactions) {
+        if (t.accountId !== accountId) continue;
+        if (t.type === 'income') bal += t.amount;
+        else if (t.type === 'expense') bal -= t.amount;
+      }
+      return bal;
+    }
+
+    function monthlyTotals(state, monthsBack = 12) {
+      const today = new Date();
+      const buckets = [];
+      for (let i = monthsBack - 1; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        buckets.push({
+          label: d.toLocaleDateString('en-US', { month: 'short' }),
+          year: d.getFullYear(), month: d.getMonth(),
+          income: 0, expense: 0, net: 0,
+        });
+      }
+      for (const t of state.transactions) {
+        const td = new Date(t.date);
+        const bucket = buckets.find(b => b.year === td.getFullYear() && b.month === td.getMonth());
+        if (bucket) {
+          if (t.type === 'income') bucket.income += t.amount;
+          else if (t.type === 'expense') bucket.expense += t.amount;
+        }
+      }
+      buckets.forEach(b => b.net = b.income - b.expense);
+      return buckets;
+    }
+
+    function spendingByCategory(state, periodStart, periodEnd) {
+      const totals = {};
+      for (const t of state.transactions) {
+        if (t.type !== 'expense') continue;
+        const td = new Date(t.date);
+        if (td < periodStart || td > periodEnd) continue;
+        totals[t.categoryId] = (totals[t.categoryId] || 0) + t.amount;
+      }
+      return state.categories
+        .filter(c => c.type === 'expense' && totals[c.id])
+        .map(c => ({ ...c, total: totals[c.id] }))
+        .sort((a, b) => b.total - a.total);
+    }
+
+    function thisMonth() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end   = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      return [start, end];
+    }
+
+    function last30Days() {
+      const end = new Date();
+      const start = new Date(); start.setDate(end.getDate() - 30);
+      return [start, end];
+    }
+
+    function budgetProgress(state, budget) {
+      const [start, end] = thisMonth();
+      let spent = 0;
+      for (const t of state.transactions) {
+        if (t.type !== 'expense' || t.categoryId !== budget.categoryId) continue;
+        const td = new Date(t.date);
+        if (td >= start && td <= end) spent += t.amount;
+      }
+      const percent = (spent / budget.amount) * 100;
+      const status = percent >= 100 ? 'over' : percent >= budget.warnThreshold ? 'warning' : 'on_track';
+      return { spent, remaining: budget.amount - spent, percent, status };
+    }
+
+    // ====================================================================
+    // CONTEXT
+    // ====================================================================
+
+    const StoreContext = createContext(null);
+    const useStore = () => useContext(StoreContext);
+
+    function StoreProvider({ children }) {
+      const [state, dispatch] = useReducer(reducer, undefined, loadState);
+      const [toast, setToast] = useState(null);
+
+      useEffect(() => { saveState(state); }, [state]);
+
+      const showToast = (message, kind = 'success') => {
+        setToast({ message, kind, id: Date.now() });
+        setTimeout(() => setToast(null), 2200);
+      };
+
+      return (
+        <StoreContext.Provider value={{ state, dispatch, showToast }}>
+          {children}
+          {toast && (
+            <div className={`toast ${toast.kind === 'success' ? 'toast-success' : toast.kind === 'error' ? 'toast-error' : ''}`}>
+              {toast.message}
+            </div>
+          )}
+        </StoreContext.Provider>
+      );
+    }
+
+    // ====================================================================
+    // ICONS - small inline SVG helpers (avoiding lucide bootstrap timing)
+    // ====================================================================
+
+    const Icon = ({ name, size = 18, className = '' }) => {
+      const paths = {
+        home: 'M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10',
+        wallet: 'M21 12V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2v-1m-4-4h.01',
+        list: 'M3 6h13M3 12h13M3 18h13M20 6h.01M20 12h.01M20 18h.01',
+        target: 'M12 22a10 10 0 100-20 10 10 0 000 20zm0-6a4 4 0 100-8 4 4 0 000 8zm0-3a1 1 0 100-2 1 1 0 000 2z',
+        trending: 'M3 17l6-6 4 4 8-8M14 7h7v7',
+        sliders: 'M4 21V14M4 10V3M12 21V12M12 8V3M20 21V16M20 12V3M1 14h6M9 8h6M17 16h6',
+        settings: 'M12 15a3 3 0 100-6 3 3 0 000 6zm9-3a8.94 8.94 0 00-.17-1.72l2.05-1.58a.5.5 0 00.12-.66l-1.94-3.36a.5.5 0 00-.6-.22l-2.41.97a8.92 8.92 0 00-2.98-1.72l-.36-2.57a.5.5 0 00-.5-.43h-3.88a.5.5 0 00-.5.43l-.36 2.57a8.93 8.93 0 00-2.98 1.72l-2.41-.97a.5.5 0 00-.6.22L1.06 8.04a.5.5 0 00.12.66l2.05 1.58A8.94 8.94 0 003 12c0 .59.06 1.16.17 1.72l-2.05 1.58a.5.5 0 00-.12.66l1.94 3.36a.5.5 0 00.6.22l2.41-.97a8.92 8.92 0 002.98 1.72l.36 2.57a.5.5 0 00.5.43h3.88a.5.5 0 00.5-.43l.36-2.57a8.93 8.93 0 002.98-1.72l2.41.97a.5.5 0 00.6-.22l1.94-3.36a.5.5 0 00-.12-.66L20.83 13.72c.11-.56.17-1.13.17-1.72z',
+        upload: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
+        plus: 'M12 5v14M5 12h14',
+        x: 'M18 6L6 18M6 6l12 12',
+        edit: 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.12 2.12 0 113 3L12 15l-4 1 1-4 9.5-9.5z',
+        trash: 'M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2',
+        check: 'M20 6L9 17l-5-5',
+        download: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3',
+        arrowDown: 'M12 5v14M19 12l-7 7-7-7',
+        arrowUp: 'M12 19V5M5 12l7-7 7 7',
+        arrowRight: 'M5 12h14M12 5l7 7-7 7',
+        logout: 'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9',
+        chevronDown: 'M6 9l6 6 6-6',
+        chevronRight: 'M9 18l6-6-6-6',
+        search: 'M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z',
+        filter: 'M22 3H2l8 9.46V19l4 2v-8.54L22 3z',
+        calendar: 'M19 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM16 2v4M8 2v4M3 10h18',
+        layers: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+        sparkle: 'M12 3l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4zM18 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2zM5 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z',
+      };
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
+          strokeLinecap="round" strokeLinejoin="round" className={className}>
+          <path d={paths[name] || paths.home} />
+        </svg>
+      );
+    };
+
+    // ====================================================================
+    // SHELL: Sidebar + Topbar
+    // ====================================================================
+
+    const NAV = [
+      { id: 'dashboard',    label: 'Dashboard',    icon: 'home' },
+      { id: 'accounts',     label: 'Accounts',     icon: 'wallet' },
+      { id: 'transactions', label: 'Transactions', icon: 'list' },
+      { id: 'budgets',      label: 'Budgets',      icon: 'sliders' },
+      { id: 'goals',        label: 'Goals',        icon: 'target' },
+      { id: 'reports',      label: 'Reports',      icon: 'trending' },
+      { id: 'categories',   label: 'Categories',   icon: 'layers' },
+      { id: 'import',       label: 'Import',       icon: 'upload' },
+      { id: 'settings',     label: 'Settings',     icon: 'settings' },
+    ];
+
+    function Sidebar({ current, onNavigate }) {
+      const { state, dispatch } = useStore();
+      return (
+        <aside className="w-64 shrink-0 border-r border-cream-200 bg-cream-50 flex flex-col min-h-screen">
+          <div className="px-6 py-7">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-ink-900 grid place-items-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 16V8h3.5a3 3 0 010 6H8m0-3h3.5a3 3 0 010 6H6" />
+                  <path d="M14.5 6v12M11 8.5h7M11 11.5h7" />
+                </svg>
+              </div>
+              <div>
+                <div className="font-display text-xl italic leading-none text-ink-900">Vault</div>
+                <div className="text-[10px] uppercase tracking-widest text-ink-500 mt-0.5">Finance Tracker</div>
+              </div>
+            </div>
+          </div>
+
+          <nav className="px-3 pt-2 flex-1">
+            {NAV.map(item => (
+              <div key={item.id} className={`navlink ${current === item.id ? 'active' : ''}`}
+                   onClick={() => onNavigate(item.id)}>
+                <Icon name={item.icon} size={16} />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </nav>
+
+          <div className="p-3">
+            <div className="card-tight">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-full bg-ember-400 grid place-items-center text-ink-900 font-semibold text-sm">
+                  {(state.user.name || 'D').charAt(0)}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{state.user.name}</div>
+                  <div className="text-xs text-ink-500 truncate">{state.user.email}</div>
+                </div>
+              </div>
+              <button className="btn btn-ghost w-full justify-center text-xs"
+                onClick={() => {
+                  if (confirm('Reset all demo data?')) dispatch({ type: 'RESET' });
+                }}>
+                <Icon name="logout" size={14} />
+                Reset demo data
+              </button>
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    function PageHeader({ title, subtitle, actions }) {
+      return (
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h1 className="display-serif text-4xl italic text-ink-900 leading-none">{title}</h1>
+            {subtitle && <p className="text-sm text-ink-500 mt-2">{subtitle}</p>}
+          </div>
+          {actions && <div className="flex gap-2">{actions}</div>}
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // MODAL
+    // ====================================================================
+
+    function Modal({ title, onClose, children, footer }) {
+      useEffect(() => {
+        const onEsc = (e) => e.key === 'Escape' && onClose();
+        window.addEventListener('keydown', onEsc);
+        return () => window.removeEventListener('keydown', onEsc);
+      }, [onClose]);
+
+      return (
+        <div className="modal-backdrop" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-5">
+              <h3 className="display-serif text-2xl italic text-ink-900">{title}</h3>
+              <button className="btn btn-ghost px-2" onClick={onClose} aria-label="Close">
+                <Icon name="x" size={18} />
+              </button>
+            </div>
+            <div>{children}</div>
+            {footer && <div className="flex justify-end gap-2 mt-6 pt-5 border-t border-cream-200">{footer}</div>}
+          </div>
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // DASHBOARD
+    // ====================================================================
+
+    function Dashboard({ onNavigate }) {
+      const { state } = useStore();
+
+      const [last30Start, last30End] = useMemo(() => last30Days(), []);
+      const [thisMonthStart, thisMonthEnd] = useMemo(() => thisMonth(), []);
+
+      const monthly = useMemo(() => monthlyTotals(state, 12), [state]);
+
+      const last30Stats = useMemo(() => {
+        let income = 0, expense = 0;
+        for (const t of state.transactions) {
+          const td = new Date(t.date);
+          if (td < last30Start || td > last30End) continue;
+          if (t.type === 'income') income += t.amount;
+          else if (t.type === 'expense') expense += t.amount;
+        }
+        return { income, expense, net: income - expense, dailyAvg: expense / 30 };
+      }, [state, last30Start, last30End]);
+
+      const topCategories = useMemo(() => {
+        return spendingByCategory(state, last30Start, last30End).slice(0, 6);
+      }, [state, last30Start, last30End]);
+
+      const recentTxns = useMemo(() => {
+        return [...state.transactions]
+          .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id))
+          .slice(0, 6);
+      }, [state.transactions]);
+
+      const accountSummaries = useMemo(() =>
+        state.accounts.map(a => ({ ...a, balance: accountBalance(state, a.id) })),
+        [state]);
+
+      const cur = state.user.defaultCurrency;
+
+      return (
+        <div>
+          <PageHeader
+            title={`Hello, ${state.user.name.split(' ')[0]}.`}
+            subtitle="Your last 30 days, condensed."
+            actions={
+              <>
+                <span className="demo-pill"><span className="dot"></span> Live demo</span>
+              </>
+            }
+          />
+
+          {/* Stat cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <StatCard label="Income (30d)" value={formatCurrency(last30Stats.income, cur)}
+              hint={<span className="text-emerald-600 inline-flex items-center gap-1"><Icon name="arrowUp" size={12} /> 30 day window</span>} />
+            <StatCard label="Spent (30d)" value={formatCurrency(last30Stats.expense, cur)}
+              hint={<span className="text-red-600 inline-flex items-center gap-1"><Icon name="arrowDown" size={12} /> 30 day window</span>} />
+            <StatCard label="Net (30d)" value={formatCurrency(last30Stats.net, cur)}
+              hint={<span className={last30Stats.net >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+                {last30Stats.net >= 0 ? 'In the black' : 'Running negative'}
+              </span>} />
+            <StatCard label="Daily Spend Avg." value={formatCurrency(last30Stats.dailyAvg, cur)}
+              hint={<span className="text-ink-500">Past 30 days</span>} />
+          </div>
+
+          {/* Charts row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div className="card lg:col-span-2">
+              <div className="flex items-baseline justify-between mb-5">
+                <h2 className="display-serif text-2xl italic">Income & expenses</h2>
+                <span className="stat-label">Last 12 months</span>
+              </div>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer>
+                  <BarChart data={monthly} margin={{ top: 10, right: 8, bottom: 0, left: -10 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#EDE6D3" vertical={false} />
+                    <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} />
+                    <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11}
+                      tickFormatter={(v) => formatCurrency(v, cur, { compact: true })} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 10, border: '1px solid #EDE6D3', background: '#fff' }}
+                      formatter={(v) => formatCurrency(v, cur)}
+                    />
+                    <Bar dataKey="income"  name="Income"  fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="display-serif text-2xl italic">Where it went</h2>
+              </div>
+              {topCategories.length === 0 ? (
+                <div className="text-sm text-ink-500 py-12 text-center">Nothing logged this period yet.</div>
+              ) : (
+                <>
+                  <div style={{ height: 180 }}>
+                    <ResponsiveContainer>
+                      <PieChart>
+                        <Pie data={topCategories} dataKey="total" nameKey="name"
+                          innerRadius={48} outerRadius={75} paddingAngle={2}>
+                          {topCategories.map(c => <Cell key={c.id} fill={c.color} />)}
+                        </Pie>
+                        <Tooltip formatter={(v) => formatCurrency(v, cur)}
+                          contentStyle={{ borderRadius: 10, border: '1px solid #EDE6D3', background: '#fff' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <ul className="mt-2 space-y-1.5 text-sm">
+                    {topCategories.slice(0, 5).map(c => {
+                      const totalSpent = topCategories.reduce((s, x) => s + x.total, 0);
+                      const pct = totalSpent > 0 ? (c.total / totalSpent * 100) : 0;
+                      return (
+                        <li key={c.id} className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 truncate">
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: c.color }} />
+                            <span className="truncate">{c.name}</span>
+                          </span>
+                          <span className="tabular text-ink-600 mono text-xs">{pct.toFixed(0)}%</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Accounts + Recent */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="card">
+              <h2 className="display-serif text-2xl italic mb-4">Your accounts</h2>
+              <ul className="space-y-3">
+                {accountSummaries.map(a => (
+                  <li key={a.id} className="flex items-center justify-between">
+                    <span className="flex items-center gap-3 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: a.color }} />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium truncate">{a.name}</span>
+                        <span className="block text-xs text-ink-500 capitalize">{a.type.replace('_', ' ')}</span>
+                      </span>
+                    </span>
+                    <span className="tabular font-medium text-sm">
+                      {formatCurrency(a.balance, a.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button className="btn btn-ghost w-full justify-center mt-4 text-sm"
+                onClick={() => onNavigate('accounts')}>
+                Manage accounts <Icon name="arrowRight" size={14} />
+              </button>
+            </div>
+
+            <div className="card lg:col-span-2">
+              <div className="flex items-baseline justify-between mb-4">
+                <h2 className="display-serif text-2xl italic">Recent activity</h2>
+                <button className="text-sm text-ink-500 hover:text-ink-900"
+                  onClick={() => onNavigate('transactions')}>
+                  View all →
+                </button>
+              </div>
+              <ul className="divide-y divide-cream-200">
+                {recentTxns.map(t => {
+                  const cat = state.categories.find(c => c.id === t.categoryId);
+                  const acc = state.accounts.find(a => a.id === t.accountId);
+                  return (
+                    <li key={t.id} className="flex items-center justify-between py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full grid place-items-center shrink-0"
+                          style={{ background: (cat?.color || '#94a3b8') + '20', color: cat?.color || '#94a3b8' }}>
+                          <Icon name={t.type === 'income' ? 'arrowDown' : 'arrowUp'} size={14} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{t.description || cat?.name || 'Transaction'}</div>
+                          <div className="text-xs text-ink-500">{formatDate(t.date)} · {acc?.name || ''}</div>
+                        </div>
+                      </div>
+                      <div className={`tabular text-sm font-medium ${t.type === 'income' ? 'text-emerald-600' : 'text-ink-900'}`}>
+                        {t.type === 'income' ? '+' : '−'}{formatCurrency(t.amount, t.currency)}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function StatCard({ label, value, hint }) {
+      return (
+        <div className="card">
+          <div className="stat-label">{label}</div>
+          <div className="stat-value mt-3">{value}</div>
+          {hint && <div className="text-xs mt-2">{hint}</div>}
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // TRANSACTIONS PAGE
+    // ====================================================================
+
+    function Transactions() {
+      const { state, dispatch, showToast } = useStore();
+      const [filter, setFilter] = useState({ search: '', accountId: '', categoryId: '', type: '' });
+      const [showForm, setShowForm] = useState(false);
+      const [editing, setEditing] = useState(null);
+
+      const filtered = useMemo(() => {
+        return state.transactions
+          .filter(t => {
+            if (filter.search && !((t.description || '').toLowerCase().includes(filter.search.toLowerCase()))) return false;
+            if (filter.accountId && t.accountId !== filter.accountId) return false;
+            if (filter.categoryId && t.categoryId !== filter.categoryId) return false;
+            if (filter.type && t.type !== filter.type) return false;
+            return true;
+          })
+          .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+      }, [state.transactions, filter]);
+
+      const groupedByDate = useMemo(() => {
+        const groups = {};
+        for (const t of filtered) {
+          if (!groups[t.date]) groups[t.date] = [];
+          groups[t.date].push(t);
+        }
+        return Object.entries(groups);
+      }, [filtered]);
+
+      return (
+        <div>
+          <PageHeader
+            title="Transactions"
+            subtitle={`${filtered.length} of ${state.transactions.length} entries`}
+            actions={
+              <button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}>
+                <Icon name="plus" size={14} /> New transaction
+              </button>
+            }
+          />
+
+          {/* Filter bar */}
+          <div className="card mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <div className="md:col-span-2">
+                <label className="label">Search</label>
+                <input className="input" placeholder="Description…" value={filter.search}
+                  onChange={e => setFilter({ ...filter, search: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Account</label>
+                <select className="select" value={filter.accountId}
+                  onChange={e => setFilter({ ...filter, accountId: e.target.value })}>
+                  <option value="">All accounts</option>
+                  {state.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Category</label>
+                <select className="select" value={filter.categoryId}
+                  onChange={e => setFilter({ ...filter, categoryId: e.target.value })}>
+                  <option value="">All categories</option>
+                  {state.categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Type</label>
+                <select className="select" value={filter.type}
+                  onChange={e => setFilter({ ...filter, type: e.target.value })}>
+                  <option value="">All</option>
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="card p-0 overflow-hidden">
+            {groupedByDate.length === 0 ? (
+              <div className="py-24 text-center text-ink-500">
+                No transactions match your filters.
+              </div>
+            ) : groupedByDate.map(([date, items]) => {
+              const dayTotal = items.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
+              return (
+                <div key={date}>
+                  <div className="flex items-center justify-between px-6 py-3 bg-cream-50 border-y border-cream-200">
+                    <div className="flex items-baseline gap-3">
+                      <span className="display-serif text-lg italic">{formatDate(date, { format: 'long' })}</span>
+                      <span className="text-xs text-ink-500">{items.length} {items.length === 1 ? 'entry' : 'entries'}</span>
+                    </div>
+                    <span className={`tabular text-sm font-medium ${dayTotal >= 0 ? 'text-emerald-600' : 'text-ink-900'}`}>
+                      {dayTotal >= 0 ? '+' : ''}{formatCurrency(dayTotal, state.user.defaultCurrency)}
+                    </span>
+                  </div>
+                  <ul>
+                    {items.map(t => {
+                      const cat = state.categories.find(c => c.id === t.categoryId);
+                      const acc = state.accounts.find(a => a.id === t.accountId);
+                      return (
+                        <li key={t.id}
+                          className="flex items-center justify-between px-6 py-3 hover:bg-cream-50 transition-colors group">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="w-9 h-9 rounded-full grid place-items-center shrink-0"
+                              style={{ background: (cat?.color || '#94a3b8') + '20', color: cat?.color || '#94a3b8' }}>
+                              <Icon name={t.type === 'income' ? 'arrowDown' : 'arrowUp'} size={14} />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">{t.description || cat?.name || 'Transaction'}</div>
+                              <div className="text-xs text-ink-500">
+                                {cat?.name || 'Uncategorized'} · {acc?.name || ''}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className={`tabular text-sm font-medium ${t.type === 'income' ? 'text-emerald-600' : 'text-ink-900'}`}>
+                              {t.type === 'income' ? '+' : '−'}{formatCurrency(t.amount, t.currency)}
+                            </span>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                              <button className="btn btn-ghost px-2 py-1" onClick={() => { setEditing(t); setShowForm(true); }}>
+                                <Icon name="edit" size={14} />
+                              </button>
+                              <button className="btn btn-ghost px-2 py-1 text-red-600"
+                                onClick={() => {
+                                  if (confirm('Delete this transaction?')) {
+                                    dispatch({ type: 'DELETE_TXN', payload: t.id });
+                                    showToast('Transaction deleted.');
+                                  }
+                                }}>
+                                <Icon name="trash" size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+
+          {showForm && (
+            <TransactionForm
+              initial={editing}
+              onClose={() => { setShowForm(false); setEditing(null); }}
+              onSave={(data) => {
+                if (editing) {
+                  dispatch({ type: 'UPDATE_TXN', payload: { ...data, id: editing.id } });
+                  showToast('Transaction updated.');
+                } else {
+                  dispatch({ type: 'CREATE_TXN', payload: data });
+                  showToast('Transaction added.');
+                }
+                setShowForm(false); setEditing(null);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function TransactionForm({ initial, onClose, onSave }) {
+      const { state } = useStore();
+      const today = new Date().toISOString().slice(0, 10);
+      const [form, setForm] = useState(initial ? { ...initial } : {
+        type: 'expense', amount: '', date: today,
+        accountId: state.accounts[0]?.id || '', categoryId: '',
+        description: '', currency: state.accounts[0]?.currency || 'ALL',
+      });
+
+      const cats = state.categories.filter(c => c.type === form.type);
+
+      const submit = (e) => {
+        e.preventDefault();
+        if (!form.amount || Number(form.amount) <= 0) return;
+        onSave({
+          type: form.type,
+          amount: Number(form.amount),
+          date: form.date,
+          accountId: form.accountId,
+          categoryId: form.categoryId || (cats[0]?.id),
+          description: form.description,
+          currency: form.currency,
+        });
+      };
+
+      return (
+        <Modal title={initial ? 'Edit transaction' : 'New transaction'} onClose={onClose}
+          footer={
+            <>
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={submit}>
+                <Icon name="check" size={14} />
+                {initial ? 'Save changes' : 'Add transaction'}
+              </button>
+            </>
+          }>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-cream-100 rounded-lg">
+              {['expense', 'income'].map(t => (
+                <button key={t} type="button"
+                  className={`py-2 rounded-md text-sm font-medium transition-all capitalize ${
+                    form.type === t ? 'bg-white shadow-sm text-ink-900' : 'text-ink-500'
+                  }`}
+                  onClick={() => setForm({ ...form, type: t, categoryId: '' })}>
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Amount</label>
+                <input type="number" step="0.01" className="input mono" placeholder="0.00"
+                  value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required autoFocus />
+              </div>
+              <div>
+                <label className="label">Date</label>
+                <input type="date" className="input" value={form.date}
+                  onChange={e => setForm({ ...form, date: e.target.value })} />
+              </div>
+            </div>
+
+            <div>
+              <label className="label">Account</label>
+              <select className="select" value={form.accountId}
+                onChange={e => {
+                  const acc = state.accounts.find(a => a.id === e.target.value);
+                  setForm({ ...form, accountId: e.target.value, currency: acc?.currency || form.currency });
+                }}>
+                {state.accounts.map(a => <option key={a.id} value={a.id}>{a.name} ({a.currency})</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Category</label>
+              <select className="select" value={form.categoryId}
+                onChange={e => setForm({ ...form, categoryId: e.target.value })}>
+                <option value="">— Choose a category —</option>
+                {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Description</label>
+              <input className="input" placeholder="What was this for?" value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })} />
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    // ====================================================================
+    // ACCOUNTS PAGE
+    // ====================================================================
+
+    function Accounts() {
+      const { state, dispatch, showToast } = useStore();
+      const [showForm, setShowForm] = useState(false);
+      const [editing, setEditing] = useState(null);
+
+      const summaries = state.accounts.map(a => ({ ...a, balance: accountBalance(state, a.id) }));
+      const totalByCurrency = summaries.reduce((acc, a) => {
+        acc[a.currency] = (acc[a.currency] || 0) + a.balance;
+        return acc;
+      }, {});
+
+      return (
+        <div>
+          <PageHeader
+            title="Accounts"
+            subtitle="Every place your money lives."
+            actions={
+              <button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}>
+                <Icon name="plus" size={14} /> Add account
+              </button>
+            }
+          />
+
+          {/* Net worth summary */}
+          <div className="card mb-6 bg-ink-900 text-cream-50 border-ink-900">
+            <div className="stat-label text-cream-200">Net worth</div>
+            <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2 mt-3">
+              {Object.entries(totalByCurrency).map(([cur, total]) => (
+                <div key={cur}>
+                  <span className="display-serif text-5xl italic">{formatCurrency(total, cur)}</span>
+                  <span className="ml-2 text-xs text-cream-200 uppercase tracking-wider">{cur}</span>
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-cream-200 mt-3">
+              Across {state.accounts.length} accounts · Not currency-converted (intentional design choice)
+            </div>
+          </div>
+
+          {/* Account grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {summaries.map(a => {
+              const monthlyChange = monthlyAccountChange(state, a.id);
+              return (
+                <div key={a.id} className="card group relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-lg" style={{ background: a.color }} />
+                      <div>
+                        <div className="font-medium">{a.name}</div>
+                        <div className="text-xs text-ink-500 capitalize">{a.type.replace('_', ' ')}</div>
+                      </div>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition flex gap-1">
+                      <button className="btn btn-ghost px-2 py-1" onClick={() => { setEditing(a); setShowForm(true); }}>
+                        <Icon name="edit" size={14} />
+                      </button>
+                      <button className="btn btn-ghost px-2 py-1 text-red-600"
+                        onClick={() => {
+                          if (confirm(`Delete ${a.name} and all its transactions?`)) {
+                            dispatch({ type: 'DELETE_ACCOUNT', payload: a.id });
+                            showToast('Account deleted.');
+                          }
+                        }}>
+                        <Icon name="trash" size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="display-serif text-3xl italic tabular">{formatCurrency(a.balance, a.currency)}</div>
+                  <div className="text-xs text-ink-500 mt-1">
+                    {monthlyChange >= 0 ? '↑' : '↓'} {formatCurrency(Math.abs(monthlyChange), a.currency)} this month
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {showForm && (
+            <AccountForm initial={editing} onClose={() => { setShowForm(false); setEditing(null); }}
+              onSave={(data) => {
+                if (editing) {
+                  dispatch({ type: 'UPDATE_ACCOUNT', payload: { ...data, id: editing.id } });
+                  showToast('Account updated.');
+                } else {
+                  dispatch({ type: 'CREATE_ACCOUNT', payload: data });
+                  showToast('Account created.');
+                }
+                setShowForm(false); setEditing(null);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function monthlyAccountChange(state, accountId) {
+      const [start, end] = thisMonth();
+      let change = 0;
+      for (const t of state.transactions) {
+        if (t.accountId !== accountId) continue;
+        const td = new Date(t.date);
+        if (td < start || td > end) continue;
+        if (t.type === 'income') change += t.amount;
+        else if (t.type === 'expense') change -= t.amount;
+      }
+      return change;
+    }
+
+    function AccountForm({ initial, onClose, onSave }) {
+      const [form, setForm] = useState(initial ? { ...initial } : {
+        name: '', type: 'checking', currency: 'ALL', initialBalance: '', color: '#3B82F6',
+      });
+      const PRESET_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#EF4444', '#06B6D4', '#64748b'];
+
+      const submit = (e) => {
+        e.preventDefault();
+        if (!form.name.trim()) return;
+        onSave({
+          name: form.name.trim(),
+          type: form.type,
+          currency: form.currency,
+          initialBalance: Number(form.initialBalance) || 0,
+          color: form.color,
+        });
+      };
+
+      return (
+        <Modal title={initial ? 'Edit account' : 'New account'} onClose={onClose}
+          footer={
+            <>
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={submit}>{initial ? 'Save' : 'Create'}</button>
+            </>
+          }>
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="label">Name</label>
+              <input className="input" placeholder="e.g. BKT Checking" value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Type</label>
+                <select className="select" value={form.type}
+                  onChange={e => setForm({ ...form, type: e.target.value })}>
+                  <option value="checking">Checking</option>
+                  <option value="savings">Savings</option>
+                  <option value="credit_card">Credit card</option>
+                  <option value="cash">Cash</option>
+                  <option value="investment">Investment</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">Currency</label>
+                <select className="select" value={form.currency}
+                  onChange={e => setForm({ ...form, currency: e.target.value })}>
+                  <option value="ALL">ALL (Albanian lek)</option>
+                  <option value="EUR">EUR (Euro)</option>
+                  <option value="USD">USD (US Dollar)</option>
+                  <option value="GBP">GBP (British Pound)</option>
+                  <option value="CHF">CHF (Swiss Franc)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="label">Starting balance</label>
+              <input type="number" step="0.01" className="input mono" placeholder="0.00"
+                value={form.initialBalance}
+                onChange={e => setForm({ ...form, initialBalance: e.target.value })} />
+            </div>
+            <div>
+              <label className="label">Color</label>
+              <div className="flex gap-2">
+                {PRESET_COLORS.map(c => (
+                  <button key={c} type="button"
+                    className={`w-8 h-8 rounded-lg transition-all ${form.color === c ? 'ring-2 ring-offset-2 ring-ink-900' : ''}`}
+                    style={{ background: c }} onClick={() => setForm({ ...form, color: c })} />
+                ))}
+              </div>
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    // ====================================================================
+    // BUDGETS PAGE
+    // ====================================================================
+
+    function Budgets() {
+      const { state, dispatch, showToast } = useStore();
+      const [showForm, setShowForm] = useState(false);
+      const [editing, setEditing] = useState(null);
+
+      const enriched = state.budgets.map(b => {
+        const progress = budgetProgress(state, b);
+        const cat = state.categories.find(c => c.id === b.categoryId);
+        return { ...b, progress, category: cat };
+      });
+
+      return (
+        <div>
+          <PageHeader
+            title="Budgets"
+            subtitle={`${enriched.length} active for this month`}
+            actions={
+              <button className="btn btn-primary" onClick={() => { setEditing(null); setShowForm(true); }}>
+                <Icon name="plus" size={14} /> New budget
+              </button>
+            }
+          />
+
+          {enriched.length === 0 ? (
+            <div className="card text-center py-16">
+              <p className="display-serif text-2xl italic text-ink-700 mb-1">No budgets yet</p>
+              <p className="text-sm text-ink-500 mb-6">Set a monthly cap for any expense category.</p>
+              <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+                <Icon name="plus" size={14} /> Create your first budget
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {enriched.map(b => (
+                <div key={b.id} className="card">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl grid place-items-center"
+                        style={{ background: (b.category?.color || '#94a3b8') + '20', color: b.category?.color || '#94a3b8' }}>
+                        <Icon name="sliders" size={16} />
+                      </div>
+                      <div>
+                        <div className="font-medium">{b.name || b.category?.name}</div>
+                        <div className="text-xs text-ink-500 capitalize">{b.period} budget · {b.currency}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="tabular text-sm">
+                          <span className="font-medium">{formatCurrency(b.progress.spent, b.currency)}</span>
+                          <span className="text-ink-500"> / {formatCurrency(b.amount, b.currency)}</span>
+                        </div>
+                        <div className={`text-xs font-medium ${
+                          b.progress.status === 'over' ? 'text-red-600' :
+                          b.progress.status === 'warning' ? 'text-amber-600' : 'text-emerald-600'
+                        }`}>
+                          {b.progress.status === 'over' ? `Over by ${formatCurrency(b.progress.spent - b.amount, b.currency)}` :
+                           b.progress.status === 'warning' ? `${(100 - b.progress.percent).toFixed(0)}% left, careful` :
+                           `${formatCurrency(b.progress.remaining, b.currency)} remaining`}
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <button className="btn btn-ghost px-2 py-1" onClick={() => { setEditing(b); setShowForm(true); }}>
+                          <Icon name="edit" size={14} />
+                        </button>
+                        <button className="btn btn-ghost px-2 py-1 text-red-600"
+                          onClick={() => {
+                            if (confirm('Delete this budget?')) {
+                              dispatch({ type: 'DELETE_BUDGET', payload: b.id });
+                              showToast('Budget deleted.');
+                            }
+                          }}>
+                          <Icon name="trash" size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{
+                      width: `${Math.min(100, b.progress.percent)}%`,
+                      background: b.progress.status === 'over' ? '#DC2626' :
+                                  b.progress.status === 'warning' ? '#F59E0B' : '#10B981',
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showForm && (
+            <BudgetForm initial={editing} onClose={() => { setShowForm(false); setEditing(null); }}
+              onSave={(data) => {
+                if (editing) {
+                  dispatch({ type: 'UPDATE_BUDGET', payload: { ...data, id: editing.id } });
+                  showToast('Budget updated.');
+                } else {
+                  dispatch({ type: 'CREATE_BUDGET', payload: data });
+                  showToast('Budget created.');
+                }
+                setShowForm(false); setEditing(null);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function BudgetForm({ initial, onClose, onSave }) {
+      const { state } = useStore();
+      const expenseCats = state.categories.filter(c => c.type === 'expense');
+      const [form, setForm] = useState(initial ? { ...initial } : {
+        name: '', categoryId: expenseCats[0]?.id || '',
+        amount: '', period: 'monthly', currency: 'ALL', warnThreshold: 80,
+        startDate: new Date().toISOString().slice(0, 10),
+      });
+
+      const submit = (e) => {
+        e.preventDefault();
+        if (!form.categoryId || !form.amount) return;
+        onSave({
+          name: form.name.trim() || expenseCats.find(c => c.id === form.categoryId)?.name,
+          categoryId: form.categoryId,
+          amount: Number(form.amount),
+          period: form.period,
+          currency: form.currency,
+          warnThreshold: Number(form.warnThreshold),
+          startDate: form.startDate,
+        });
+      };
+
+      return (
+        <Modal title={initial ? 'Edit budget' : 'New budget'} onClose={onClose}
+          footer={
+            <>
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={submit}>{initial ? 'Save' : 'Create'}</button>
+            </>
+          }>
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="label">Category</label>
+              <select className="select" value={form.categoryId}
+                onChange={e => setForm({ ...form, categoryId: e.target.value })}>
+                {expenseCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label">Label (optional)</label>
+              <input className="input" placeholder="e.g. Eating out" value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Amount</label>
+                <input type="number" step="0.01" className="input mono" placeholder="0.00"
+                  value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} required />
+              </div>
+              <div>
+                <label className="label">Currency</label>
+                <select className="select" value={form.currency}
+                  onChange={e => setForm({ ...form, currency: e.target.value })}>
+                  <option value="ALL">ALL</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="label">Warn me at {form.warnThreshold}% of budget</label>
+              <input type="range" min="50" max="100" step="5" value={form.warnThreshold}
+                className="w-full" onChange={e => setForm({ ...form, warnThreshold: e.target.value })} />
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    // ====================================================================
+    // GOALS PAGE
+    // ====================================================================
+
+    function Goals() {
+      const { state, dispatch, showToast } = useStore();
+      const [showForm, setShowForm] = useState(false);
+      const [contributingTo, setContributingTo] = useState(null);
+
+      return (
+        <div>
+          <PageHeader
+            title="Goals"
+            subtitle="What you’re saving toward."
+            actions={
+              <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+                <Icon name="plus" size={14} /> New goal
+              </button>
+            }
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {state.goals.map(g => {
+              const pct = (g.current / g.target) * 100;
+              const remaining = g.target - g.current;
+              const daysLeft = g.targetDate
+                ? Math.ceil((new Date(g.targetDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+              return (
+                <div key={g.id} className="card relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
+                    style={{ background: g.color, transform: 'translate(50%, -50%)' }} />
+                  <div className="relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl grid place-items-center"
+                          style={{ background: g.color + '20', color: g.color }}>
+                          <Icon name="target" size={18} />
+                        </div>
+                        <div>
+                          <div className="font-medium">{g.name}</div>
+                          {g.description && <div className="text-xs text-ink-500">{g.description}</div>}
+                        </div>
+                      </div>
+                      <button className="btn btn-ghost px-2 py-1 text-red-600"
+                        onClick={() => {
+                          if (confirm(`Delete goal "${g.name}"?`)) {
+                            dispatch({ type: 'DELETE_GOAL', payload: g.id });
+                            showToast('Goal deleted.');
+                          }
+                        }}>
+                        <Icon name="trash" size={14} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="display-serif text-3xl italic">{formatCurrency(g.current, g.currency)}</span>
+                      <span className="text-sm text-ink-500">of {formatCurrency(g.target, g.currency)}</span>
+                    </div>
+
+                    <div className="progress-track mb-3">
+                      <div className="progress-fill" style={{ width: `${Math.min(100, pct)}%`, background: g.color }} />
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-ink-500">
+                        <span className="font-medium tabular">{pct.toFixed(0)}%</span> complete · {formatCurrency(remaining, g.currency)} to go
+                      </span>
+                      {daysLeft !== null && (
+                        <span className={`font-medium ${daysLeft < 30 ? 'text-amber-600' : 'text-ink-500'}`}>
+                          {daysLeft > 0 ? `${daysLeft} days left` : daysLeft === 0 ? 'Due today' : `${-daysLeft} days overdue`}
+                        </span>
+                      )}
+                    </div>
+
+                    <button className="btn btn-amber w-full justify-center mt-4"
+                      onClick={() => setContributingTo(g)}>
+                      <Icon name="plus" size={14} /> Add contribution
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {showForm && (
+            <GoalForm onClose={() => setShowForm(false)}
+              onSave={(data) => {
+                dispatch({ type: 'CREATE_GOAL', payload: data });
+                showToast('Goal created.');
+                setShowForm(false);
+              }}
+            />
+          )}
+
+          {contributingTo && (
+            <ContributeForm goal={contributingTo} onClose={() => setContributingTo(null)}
+              onSave={(amount) => {
+                dispatch({ type: 'CONTRIBUTE_GOAL', payload: { id: contributingTo.id, amount } });
+                showToast(`Added ${formatCurrency(amount, contributingTo.currency)} to ${contributingTo.name}.`);
+                setContributingTo(null);
+              }} />
+          )}
+        </div>
+      );
+    }
+
+    function GoalForm({ onClose, onSave }) {
+      const [form, setForm] = useState({ name: '', target: '', current: '0', currency: 'ALL', color: '#10B981', description: '', targetDate: '' });
+      const COLORS = ['#10B981', '#F59E0B', '#3B82F6', '#8B5CF6', '#EC4899', '#06B6D4'];
+      const submit = (e) => {
+        e.preventDefault();
+        if (!form.name.trim() || !form.target) return;
+        onSave({
+          name: form.name.trim(), target: Number(form.target), current: Number(form.current) || 0,
+          currency: form.currency, color: form.color, description: form.description, targetDate: form.targetDate || null,
+        });
+      };
+      return (
+        <Modal title="New goal" onClose={onClose}
+          footer={<><button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button className="btn btn-primary" onClick={submit}>Create</button></>}>
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label className="label">Name</label>
+              <input className="input" placeholder="Emergency fund" value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus />
+            </div>
+            <div>
+              <label className="label">Description</label>
+              <input className="input" placeholder="(optional)" value={form.description}
+                onChange={e => setForm({ ...form, description: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Target amount</label>
+                <input type="number" className="input mono" placeholder="0" value={form.target}
+                  onChange={e => setForm({ ...form, target: e.target.value })} required />
+              </div>
+              <div>
+                <label className="label">Currency</label>
+                <select className="select" value={form.currency}
+                  onChange={e => setForm({ ...form, currency: e.target.value })}>
+                  <option value="ALL">ALL</option><option value="EUR">EUR</option><option value="USD">USD</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Already saved</label>
+                <input type="number" className="input mono" placeholder="0" value={form.current}
+                  onChange={e => setForm({ ...form, current: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Target date</label>
+                <input type="date" className="input" value={form.targetDate}
+                  onChange={e => setForm({ ...form, targetDate: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="label">Color</label>
+              <div className="flex gap-2">
+                {COLORS.map(c => (
+                  <button key={c} type="button"
+                    className={`w-8 h-8 rounded-lg ${form.color === c ? 'ring-2 ring-offset-2 ring-ink-900' : ''}`}
+                    style={{ background: c }} onClick={() => setForm({ ...form, color: c })} />
+                ))}
+              </div>
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    function ContributeForm({ goal, onClose, onSave }) {
+      const [amount, setAmount] = useState('');
+      const submit = (e) => {
+        e.preventDefault();
+        const v = Number(amount);
+        if (v > 0) onSave(v);
+      };
+      return (
+        <Modal title={`Contribute to "${goal.name}"`} onClose={onClose}
+          footer={<><button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+            <button className="btn btn-amber" onClick={submit}>Add</button></>}>
+          <form onSubmit={submit} className="space-y-4">
+            <div className="text-sm text-ink-500">
+              Currently at <span className="font-medium text-ink-900 tabular">{formatCurrency(goal.current, goal.currency)}</span>
+              {' '}of <span className="font-medium text-ink-900 tabular">{formatCurrency(goal.target, goal.currency)}</span>
+            </div>
+            <div>
+              <label className="label">Amount</label>
+              <input type="number" step="0.01" className="input mono" placeholder="0.00"
+                value={amount} onChange={e => setAmount(e.target.value)} autoFocus required />
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    // ====================================================================
+    // REPORTS PAGE
+    // ====================================================================
+
+    function Reports() {
+      const { state } = useStore();
+      const [range, setRange] = useState('30');
+      const cur = state.user.defaultCurrency;
+
+      const [start, end] = useMemo(() => {
+        const e = new Date();
+        const s = new Date(); s.setDate(e.getDate() - Number(range));
+        return [s, e];
+      }, [range]);
+
+      const byCategory = useMemo(() => spendingByCategory(state, start, end), [state, start, end]);
+      const monthly = useMemo(() => monthlyTotals(state, 12), [state]);
+
+      const daily = useMemo(() => {
+        const days = {};
+        const dayStr = (d) => d.toISOString().slice(0, 10);
+        for (let i = Number(range); i >= 0; i--) {
+          const d = new Date(end); d.setDate(end.getDate() - i);
+          days[dayStr(d)] = { date: dayStr(d), label: formatDate(d), total: 0 };
+        }
+        for (const t of state.transactions) {
+          if (t.type !== 'expense') continue;
+          if (!days[t.date]) continue;
+          days[t.date].total += t.amount;
+        }
+        return Object.values(days);
+      }, [state.transactions, range, end]);
+
+      const netWorth = useMemo(() => {
+        // Compute running net worth at end of each of the last 12 months
+        const today = new Date();
+        const months = [];
+        for (let i = 11; i >= 0; i--) {
+          const d = new Date(today.getFullYear(), today.getMonth() - i + 1, 0); // last day of that month
+          months.push({ date: d, label: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) });
+        }
+        const initial = state.accounts.reduce((s, a) => s + a.initialBalance, 0);
+        return months.map(m => {
+          let bal = initial;
+          for (const t of state.transactions) {
+            if (new Date(t.date) > m.date) continue;
+            if (t.type === 'income') bal += t.amount;
+            else if (t.type === 'expense') bal -= t.amount;
+          }
+          return { label: m.label, netWorth: bal };
+        });
+      }, [state]);
+
+      const topMerchants = useMemo(() => {
+        const totals = {};
+        for (const t of state.transactions) {
+          if (t.type !== 'expense' || !t.description) continue;
+          const td = new Date(t.date);
+          if (td < start || td > end) continue;
+          totals[t.description] = (totals[t.description] || 0) + t.amount;
+        }
+        return Object.entries(totals)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 8)
+          .map(([name, total]) => ({ name, total }));
+      }, [state.transactions, start, end]);
+
+      const downloadCsv = () => {
+        const rows = [['Date', 'Type', 'Amount', 'Currency', 'Category', 'Account', 'Description']];
+        for (const t of state.transactions) {
+          const cat = state.categories.find(c => c.id === t.categoryId)?.name || '';
+          const acc = state.accounts.find(a => a.id === t.accountId)?.name || '';
+          rows.push([t.date, t.type, t.amount, t.currency, cat, acc, t.description || '']);
+        }
+        const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'transactions.csv'; a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      return (
+        <div>
+          <PageHeader
+            title="Reports"
+            subtitle="Patterns the spreadsheet wouldn’t show you."
+            actions={
+              <>
+                <select className="select" style={{ width: 'auto' }} value={range}
+                  onChange={e => setRange(e.target.value)}>
+                  <option value="7">Last 7 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                  <option value="365">Last year</option>
+                </select>
+                <button className="btn btn-secondary" onClick={downloadCsv}>
+                  <Icon name="download" size={14} /> Export CSV
+                </button>
+              </>
+            }
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div className="card">
+              <h2 className="display-serif text-2xl italic mb-4">Daily spending</h2>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer>
+                  <AreaChart data={daily}>
+                    <defs>
+                      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#EDE6D3" vertical={false} />
+                    <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10}
+                      interval="preserveStartEnd" />
+                    <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10}
+                      tickFormatter={(v) => formatCurrency(v, cur, { compact: true })} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 10, border: '1px solid #EDE6D3', background: '#fff' }}
+                      formatter={(v) => formatCurrency(v, cur)} />
+                    <Area type="monotone" dataKey="total" stroke="#F59E0B" strokeWidth={2}
+                      fill="url(#g1)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="card">
+              <h2 className="display-serif text-2xl italic mb-4">Net worth trajectory</h2>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer>
+                  <LineChart data={netWorth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#EDE6D3" vertical={false} />
+                    <XAxis dataKey="label" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10} />
+                    <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10}
+                      tickFormatter={(v) => formatCurrency(v, cur, { compact: true })} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 10, border: '1px solid #EDE6D3', background: '#fff' }}
+                      formatter={(v) => formatCurrency(v, cur)} />
+                    <Line type="monotone" dataKey="netWorth" stroke="#0f172a" strokeWidth={2.5}
+                      dot={{ fill: '#0f172a', r: 3 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="card">
+              <h2 className="display-serif text-2xl italic mb-4">By category</h2>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer>
+                  <BarChart data={byCategory.slice(0, 8)} layout="vertical" margin={{ left: 30 }}>
+                    <XAxis type="number" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10}
+                      tickFormatter={(v) => formatCurrency(v, cur, { compact: true })} />
+                    <YAxis type="category" dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} width={90} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 10, border: '1px solid #EDE6D3', background: '#fff' }}
+                      formatter={(v) => formatCurrency(v, cur)} />
+                    <Bar dataKey="total" radius={[0, 4, 4, 0]}>
+                      {byCategory.slice(0, 8).map(c => <Cell key={c.id} fill={c.color} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="card">
+              <h2 className="display-serif text-2xl italic mb-4">Top spending places</h2>
+              {topMerchants.length === 0 ? (
+                <div className="text-sm text-ink-500 py-12 text-center">No data in this range.</div>
+              ) : (
+                <ul className="space-y-2">
+                  {topMerchants.map((m, i) => {
+                    const max = topMerchants[0].total;
+                    return (
+                      <li key={m.name} className="flex items-center gap-3">
+                        <span className="mono text-xs text-ink-500 w-6 tabular text-right">{i + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="truncate font-medium">{m.name}</span>
+                            <span className="tabular shrink-0 ml-2">{formatCurrency(m.total, cur)}</span>
+                          </div>
+                          <div className="h-1.5 bg-cream-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-ink-900" style={{ width: `${(m.total / max) * 100}%` }} />
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // IMPORT PAGE
+    // ====================================================================
+
+    function ImportPage() {
+      const { state, dispatch, showToast } = useStore();
+      const [step, setStep] = useState(1);
+      const [csvText, setCsvText] = useState('');
+      const [parsed, setParsed] = useState(null);
+      const [mapping, setMapping] = useState({ date_col: '', amount_col: '', description_col: '' });
+      const [accountId, setAccountId] = useState(state.accounts[0]?.id || '');
+
+      const SAMPLE_CSV = `Date,Description,Amount\n${new Date().toISOString().slice(0,10)},Coffee shop,-450\n${new Date(Date.now() - 86400000).toISOString().slice(0,10)},ATM withdrawal,-5000\n${new Date(Date.now() - 172800000).toISOString().slice(0,10)},Salary,75000\n`;
+
+      const onFile = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          setCsvText(reader.result);
+          previewCsv(reader.result);
+          setStep(2);
+        };
+        reader.readAsText(f);
+      };
+
+      const previewCsv = (text) => {
+        const lines = text.split('\n').filter(l => l.trim());
+        if (lines.length === 0) return;
+        const delim = lines[0].includes(';') ? ';' : ',';
+        const headers = lines[0].split(delim).map(h => h.trim().replace(/^"|"$/g, ''));
+        const rows = lines.slice(1, 6).map(l => l.split(delim).map(c => c.trim().replace(/^"|"$/g, '')));
+        setParsed({ headers, rows, total: lines.length - 1 });
+        // Auto-guess mapping
+        const guess = {};
+        for (const h of headers) {
+          const lc = h.toLowerCase();
+          if (!guess.date_col && /date|datum/.test(lc)) guess.date_col = h;
+          if (!guess.amount_col && /amount|sum|value|debit|credit/.test(lc)) guess.amount_col = h;
+          if (!guess.description_col && /desc|name|memo|narration|reference/.test(lc)) guess.description_col = h;
+        }
+        setMapping({ ...mapping, ...guess });
+      };
+
+      const doImport = () => {
+        if (!mapping.date_col || !mapping.amount_col || !accountId) {
+          showToast('Map date and amount columns first.', 'error'); return;
+        }
+        const lines = csvText.split('\n').filter(l => l.trim());
+        const delim = lines[0].includes(';') ? ';' : ',';
+        const headers = lines[0].split(delim).map(h => h.trim().replace(/^"|"$/g, ''));
+        const dIdx = headers.indexOf(mapping.date_col);
+        const aIdx = headers.indexOf(mapping.amount_col);
+        const descIdx = mapping.description_col ? headers.indexOf(mapping.description_col) : -1;
+
+        let inserted = 0;
+        for (let i = 1; i < lines.length; i++) {
+          const cells = lines[i].split(delim).map(c => c.trim().replace(/^"|"$/g, ''));
+          const dateStr = cells[dIdx];
+          const amountStr = cells[aIdx];
+          if (!dateStr || !amountStr) continue;
+
+          // Parse date
+          let date = null;
+          for (const fmt of [/^\d{4}-\d{2}-\d{2}$/, /^\d{2}\/\d{2}\/\d{4}$/, /^\d{2}\.\d{2}\.\d{4}$/]) {
+            if (fmt.test(dateStr)) {
+              if (dateStr.includes('-')) date = dateStr;
+              else if (dateStr.includes('/')) { const [d, m, y] = dateStr.split('/'); date = `${y}-${m}-${d}`; }
+              else if (dateStr.includes('.')) { const [d, m, y] = dateStr.split('.'); date = `${y}-${m}-${d}`; }
+              break;
+            }
+          }
+          if (!date) continue;
+
+          // Parse amount
+          let amount = amountStr.replace(/[^0-9.,\-()]/g, '');
+          const isNeg = amount.startsWith('-') || (amount.startsWith('(') && amount.endsWith(')'));
+          amount = amount.replace(/[()-]/g, '');
+          if (amount.includes(',') && amount.includes('.')) {
+            if (amount.lastIndexOf(',') > amount.lastIndexOf('.')) amount = amount.replace(/\./g, '').replace(',', '.');
+            else amount = amount.replace(/,/g, '');
+          } else if (amount.includes(',')) {
+            if (/,\d{1,2}$/.test(amount)) amount = amount.replace(',', '.');
+            else amount = amount.replace(/,/g, '');
+          }
+          const val = Math.abs(Number(amount));
+          if (!val || isNaN(val)) continue;
+
+          dispatch({
+            type: 'CREATE_TXN',
+            payload: {
+              date, type: isNeg ? 'expense' : 'income', amount: val,
+              accountId, currency: state.accounts.find(a => a.id === accountId)?.currency || 'ALL',
+              description: descIdx >= 0 ? cells[descIdx] : '',
+            },
+          });
+          inserted++;
+        }
+        showToast(`${inserted} transactions imported.`);
+        setStep(3);
+        setTimeout(() => { setStep(1); setCsvText(''); setParsed(null); }, 2500);
+      };
+
+      return (
+        <div>
+          <PageHeader title="Import CSV" subtitle="Bring statements in from your bank." />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              {step === 1 && (
+                <div className="card text-center py-16">
+                  <div className="display-serif text-3xl italic text-ink-900 mb-2">Drop your CSV here</div>
+                  <p className="text-sm text-ink-500 mb-6 max-w-md mx-auto">
+                    We support most Albanian bank statement exports (BKT, Raiffeisen, Credins, Tirana Bank) and any generic CSV.
+                  </p>
+                  <label className="btn btn-primary inline-flex cursor-pointer">
+                    <Icon name="upload" size={14} /> Choose file…
+                    <input type="file" accept=".csv,text/csv" hidden onChange={onFile} />
+                  </label>
+                  <button className="btn btn-ghost ml-2"
+                    onClick={() => { setCsvText(SAMPLE_CSV); previewCsv(SAMPLE_CSV); setStep(2); }}>
+                    Use sample data
+                  </button>
+                </div>
+              )}
+
+              {step === 2 && parsed && (
+                <div className="card">
+                  <div className="mb-5">
+                    <div className="text-xs text-ink-500 mb-1">Step 2 of 2</div>
+                    <h2 className="display-serif text-2xl italic">Map your columns</h2>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 mb-5">
+                    <div>
+                      <label className="label">Date column</label>
+                      <select className="select" value={mapping.date_col}
+                        onChange={e => setMapping({ ...mapping, date_col: e.target.value })}>
+                        <option value="">— pick —</option>
+                        {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label">Amount column</label>
+                      <select className="select" value={mapping.amount_col}
+                        onChange={e => setMapping({ ...mapping, amount_col: e.target.value })}>
+                        <option value="">— pick —</option>
+                        {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="label">Description (optional)</label>
+                      <select className="select" value={mapping.description_col}
+                        onChange={e => setMapping({ ...mapping, description_col: e.target.value })}>
+                        <option value="">— none —</option>
+                        {parsed.headers.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mb-5">
+                    <label className="label">Import into account</label>
+                    <select className="select" value={accountId} onChange={e => setAccountId(e.target.value)}>
+                      {state.accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="text-xs uppercase tracking-wider text-ink-500 mb-2">Preview (first 5 rows)</div>
+                  <div className="overflow-auto rounded-lg border border-cream-200">
+                    <table className="text-xs w-full">
+                      <thead className="bg-cream-50">
+                        <tr>{parsed.headers.map(h => (
+                          <th key={h} className={`text-left p-2 font-medium ${
+                            h === mapping.date_col || h === mapping.amount_col || h === mapping.description_col
+                              ? 'bg-amber-100 text-amber-900' : 'text-ink-700'
+                          }`}>{h}</th>
+                        ))}</tr>
+                      </thead>
+                      <tbody>
+                        {parsed.rows.map((r, i) => (
+                          <tr key={i} className="border-t border-cream-200">
+                            {r.map((c, j) => <td key={j} className="p-2 text-ink-700 mono">{c}</td>)}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex justify-between mt-5">
+                    <button className="btn btn-secondary" onClick={() => { setStep(1); setParsed(null); setCsvText(''); }}>
+                      ← Start over
+                    </button>
+                    <button className="btn btn-primary" onClick={doImport}>
+                      Import {parsed.total} rows →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="card text-center py-16">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 grid place-items-center mx-auto mb-4">
+                    <Icon name="check" size={28} className="text-emerald-600" />
+                  </div>
+                  <div className="display-serif text-3xl italic">Imported.</div>
+                </div>
+              )}
+            </div>
+
+            <aside className="card">
+              <h3 className="display-serif text-xl italic mb-3">How importing works</h3>
+              <ol className="text-sm space-y-3 text-ink-700">
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-cream-100 grid place-items-center font-medium text-xs shrink-0">1</span>
+                  <span>Upload a CSV exported from your bank.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-cream-100 grid place-items-center font-medium text-xs shrink-0">2</span>
+                  <span>We auto-detect the date and amount columns, but you can override.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-cream-100 grid place-items-center font-medium text-xs shrink-0">3</span>
+                  <span>Negative amounts become expenses, positive become income.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="w-6 h-6 rounded-full bg-cream-100 grid place-items-center font-medium text-xs shrink-0">4</span>
+                  <span>Re-importing the same file is safe — duplicates are detected by content hash.</span>
+                </li>
+              </ol>
+              <div className="mt-5 p-3 rounded-lg bg-cream-50 text-xs text-ink-600">
+                <strong>Tip:</strong> EU date formats (DD/MM/YYYY) and EU number formats (1.234,56) are both supported.
+              </div>
+            </aside>
+          </div>
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // SETTINGS PAGE
+    // ====================================================================
+
+    function Settings() {
+      const { state, dispatch, showToast } = useStore();
+      const [form, setForm] = useState({ name: state.user.name, email: state.user.email, defaultCurrency: state.user.defaultCurrency });
+
+      const save = (e) => {
+        e.preventDefault();
+        dispatch({ type: 'UPDATE_USER', payload: form });
+        showToast('Settings saved.');
+      };
+
+      return (
+        <div>
+          <PageHeader title="Settings" subtitle="Tune the tracker to fit you." />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <form onSubmit={save} className="card lg:col-span-2 space-y-4">
+              <h2 className="display-serif text-2xl italic mb-2">Profile</h2>
+              <div>
+                <label className="label">Full name</label>
+                <input className="input" value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Email</label>
+                <input className="input" value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Default currency</label>
+                <select className="select" value={form.defaultCurrency}
+                  onChange={e => setForm({ ...form, defaultCurrency: e.target.value })}>
+                  <option value="ALL">ALL — Albanian lek</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="GBP">GBP — British Pound</option>
+                  <option value="CHF">CHF — Swiss Franc</option>
+                </select>
+              </div>
+              <div className="pt-2">
+                <button className="btn btn-primary" type="submit">Save changes</button>
+              </div>
+            </form>
+
+            <div className="space-y-4">
+              <div className="card">
+                <h3 className="display-serif text-xl italic mb-3">About this demo</h3>
+                <p className="text-sm text-ink-600 leading-relaxed">
+                  This is a fully working, single-file version of the Personal Finance Tracker built for thesis defense purposes.
+                  All data lives in your browser's <span className="mono text-xs">localStorage</span> — nothing is sent anywhere.
+                </p>
+                <div className="mt-3 text-xs text-ink-500">
+                  Production version: Flask + React + PostgreSQL with JWT auth.
+                </div>
+              </div>
+              <div className="card border-red-200">
+                <h3 className="display-serif text-xl italic mb-3 text-red-700">Danger zone</h3>
+                <p className="text-sm text-ink-600 mb-3">Reset everything back to the seed dataset.</p>
+                <button className="btn btn-danger w-full justify-center"
+                  onClick={() => {
+                    if (confirm('Wipe all demo data and reseed?')) {
+                      dispatch({ type: 'RESET' });
+                      showToast('Reset complete.');
+                    }
+                  }}>
+                  <Icon name="trash" size={14} /> Reset demo data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ====================================================================
+    // APP
+    // ====================================================================
+
+    // ====================================================================
+    // CATEGORIES — manage income & expense categories
+    // ====================================================================
+
+    function Categories() {
+      const { state, dispatch, showToast } = useStore();
+      const [showForm, setShowForm] = useState(false);
+      const [tab, setTab] = useState('expense');
+
+      // Count usage per category for context
+      const usageById = useMemo(() => {
+        const m = {};
+        for (const t of state.transactions) {
+          if (t.categoryId) m[t.categoryId] = (m[t.categoryId] || 0) + 1;
+        }
+        return m;
+      }, [state.transactions]);
+
+      const filtered = state.categories.filter(c => c.type === tab);
+
+      return (
+        <div>
+          <PageHeader
+            title="Categories"
+            subtitle={`${state.categories.length} total · ${state.categories.filter(c => c.type === 'expense').length} expense, ${state.categories.filter(c => c.type === 'income').length} income`}
+            actions={
+              <button className="btn btn-primary" onClick={() => setShowForm(true)}>
+                <Icon name="plus" size={14} /> New category
+              </button>
+            }
+          />
+
+          <div className="grid grid-cols-2 gap-1 p-1 bg-cream-100 rounded-lg mb-4 max-w-xs">
+            {['expense', 'income'].map(t => (
+              <button
+                key={t}
+                className={`py-2 rounded-md text-sm font-medium transition-all capitalize ${tab === t ? 'bg-white shadow-sm text-ink-900' : 'text-ink-500'}`}
+                onClick={() => setTab(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          <div className="card p-0 overflow-hidden">
+            {filtered.length === 0 ? (
+              <div className="py-16 text-center text-ink-500 text-sm">
+                No {tab} categories yet.
+              </div>
+            ) : (
+              <ul className="divide-y divide-cream-200">
+                {filtered.map(c => {
+                  const uses = usageById[c.id] || 0;
+                  return (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between px-6 py-3 hover:bg-cream-50 transition-colors group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ background: c.color }}
+                        />
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium truncate">{c.name}</div>
+                          <div className="text-xs text-ink-500">
+                            {uses === 0 ? 'Unused' : `${uses} transaction${uses === 1 ? '' : 's'}`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <button
+                          className="btn btn-ghost px-2 py-1 text-red-600"
+                          onClick={() => {
+                            if (uses > 0) {
+                              showToast(`Cannot delete: ${uses} transaction${uses === 1 ? ' uses' : 's use'} this category.`, 'error');
+                              return;
+                            }
+                            if (confirm(`Delete category "${c.name}"?`)) {
+                              dispatch({ type: 'DELETE_CATEGORY', payload: c.id });
+                              showToast('Category deleted.');
+                            }
+                          }}
+                        >
+                          <Icon name="trash" size={14} />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {showForm && (
+            <CategoryForm
+              defaultType={tab}
+              onClose={() => setShowForm(false)}
+              onSave={data => {
+                dispatch({ type: 'CREATE_CATEGORY', payload: data });
+                showToast('Category created.');
+                setShowForm(false);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function CategoryForm({ defaultType, onClose, onSave }) {
+      const PRESET_COLORS = ['#EF4444', '#F59E0B', '#F97316', '#3B82F6', '#0EA5E9', '#EC4899', '#A855F7', '#8B5CF6', '#14B8A6', '#10B981', '#22C55E', '#84CC16', '#6366F1', '#06B6D4'];
+      const [form, setForm] = useState({
+        name: '',
+        type: defaultType || 'expense',
+        color: PRESET_COLORS[0],
+      });
+      const submit = e => {
+        e.preventDefault();
+        if (!form.name.trim()) return;
+        onSave({ name: form.name.trim(), type: form.type, color: form.color });
+      };
+      return (
+        <Modal
+          title="New category"
+          onClose={onClose}
+          footer={
+            <>
+              <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={submit}>Create</button>
+            </>
+          }
+        >
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-cream-100 rounded-lg">
+              {['expense', 'income'].map(t => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`py-2 rounded-md text-sm font-medium transition-all capitalize ${form.type === t ? 'bg-white shadow-sm text-ink-900' : 'text-ink-500'}`}
+                  onClick={() => setForm({ ...form, type: t })}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <label className="label">Name</label>
+              <input
+                className="input"
+                placeholder="e.g. Subscriptions"
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="label">Color</label>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_COLORS.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`w-8 h-8 rounded-lg transition-all ${form.color === c ? 'ring-2 ring-offset-2 ring-ink-900' : ''}`}
+                    style={{ background: c }}
+                    onClick={() => setForm({ ...form, color: c })}
+                  />
+                ))}
+              </div>
+            </div>
+          </form>
+        </Modal>
+      );
+    }
+
+    function App() {
+      const [page, setPage] = useState('dashboard');
+
+      const pages = {
+        dashboard:    <Dashboard onNavigate={setPage} />,
+        accounts:     <Accounts />,
+        transactions: <Transactions />,
+        budgets:      <Budgets />,
+        goals:        <Goals />,
+        reports:      <Reports />,
+        categories:   <Categories />,
+        import:       <ImportPage />,
+        settings:     <Settings />,
+      };
+
+      return (
+        <div className="flex min-h-screen">
+          <Sidebar current={page} onNavigate={setPage} />
+          <main className="flex-1 min-w-0 bg-cream-50">
+            <div className="max-w-6xl mx-auto px-10 py-10">
+              {pages[page]}
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    const _ReactDOM = window.ReactDOM;
+    const _createRoot = _ReactDOM.createRoot ?? _ReactDOM.default?.createRoot;
+    _createRoot(document.getElementById('root')).render(
+      <StoreProvider><App /></StoreProvider>
+    );
+  </script>
+</body>
+</html>

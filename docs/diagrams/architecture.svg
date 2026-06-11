@@ -1,0 +1,347 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 880" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#D97706"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3B82F6"/>
+    </marker>
+    <style>
+      .figure-title { font-size: 22px; font-weight: 700; fill: #0f172a; }
+      .figure-sub   { font-size: 13px; fill: #64748b; }
+      .tier-label   { font-size: 11px; font-weight: 700; fill: #fff; letter-spacing: 0.15em; text-transform: uppercase; }
+      .tier-name    { font-size: 18px; font-weight: 700; fill: #0f172a; }
+      .tier-tech    { font-size: 12px; fill: #64748b; font-style: italic; }
+      .box-title    { font-size: 13px; font-weight: 600; fill: #0f172a; }
+      .box-body     { font-size: 11px; fill: #475569; }
+      .box-mono     { font-size: 11px; fill: #475569; font-family: "JetBrains Mono", monospace; }
+      .flow-label   { font-size: 11px; fill: #475569; font-weight: 500; }
+      .flow-protocol{ font-size: 10px; fill: #94a3b8; font-family: "JetBrains Mono", monospace; }
+    </style>
+  </defs>
+
+  <rect width="1240" height="880" fill="#FBF9F4"/>
+
+  <!-- Title -->
+  <text x="40" y="44" class="figure-title">System Architecture</text>
+  <text x="40" y="64" class="figure-sub">Personal Finance Tracker · Three-tier architecture with stateless JWT authentication</text>
+
+  <!-- ===========================================================
+       TIER 1: PRESENTATION (React SPA)
+       =========================================================== -->
+  <g>
+    <rect x="40" y="100" width="380" height="660" rx="14" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+
+    <rect x="40" y="100" width="380" height="40" rx="14" fill="#3B82F6"/>
+    <rect x="40" y="126" width="380" height="14" fill="#3B82F6"/>
+    <text x="60" y="126" class="tier-label">Presentation Tier</text>
+
+    <text x="60" y="170" class="tier-name">React Single-Page App</text>
+    <text x="60" y="188" class="tier-tech">Vite · React 18 · Recharts · Tailwind CSS</text>
+
+    <!-- Browser icon and user -->
+    <g transform="translate(60, 210)">
+      <rect width="80" height="60" rx="6" fill="#fff" stroke="#3B82F6" stroke-width="2"/>
+      <rect width="80" height="14" rx="6" fill="#3B82F6"/>
+      <rect width="80" height="6" y="8" fill="#3B82F6"/>
+      <circle cx="8" cy="7" r="2" fill="#fff"/>
+      <circle cx="16" cy="7" r="2" fill="#fff"/>
+      <circle cx="24" cy="7" r="2" fill="#fff"/>
+      <text x="40" y="42" text-anchor="middle" font-size="10" fill="#3B82F6" font-weight="600">Browser</text>
+      <text x="40" y="54" text-anchor="middle" font-size="9" fill="#94a3b8">Chrome · Firefox · Safari</text>
+    </g>
+
+    <!-- User -->
+    <g transform="translate(170, 215)">
+      <circle cx="20" cy="20" r="12" fill="#F59E0B"/>
+      <path d="M 8 50 Q 20 38 32 50 L 32 60 L 8 60 Z" fill="#F59E0B"/>
+      <text x="60" y="30" font-size="12" fill="#0f172a" font-weight="600">End user</text>
+      <text x="60" y="46" font-size="10" fill="#64748b">Single-user self-hosted</text>
+    </g>
+
+    <!-- SPA components -->
+    <text x="60" y="305" class="box-title">SPA components</text>
+
+    <g transform="translate(60, 318)">
+      <rect width="340" height="60" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Pages (10 routes)</text>
+      <text x="14" y="40" class="box-body">Dashboard · Transactions · Accounts · Budgets</text>
+      <text x="14" y="54" class="box-body">Goals · Reports · Categories · Import · Settings · Auth</text>
+    </g>
+
+    <g transform="translate(60, 388)">
+      <rect width="340" height="50" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Components</text>
+      <text x="14" y="40" class="box-body">Layout · Charts · Forms · UI primitives</text>
+    </g>
+
+    <g transform="translate(60, 448)">
+      <rect width="340" height="50" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">State management</text>
+      <text x="14" y="40" class="box-body">React Context (auth) + local useState (page)</text>
+    </g>
+
+    <g transform="translate(60, 508)">
+      <rect width="340" height="68" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">API service layer (Axios)</text>
+      <text x="14" y="40" class="box-body">JWT injection on every request</text>
+      <text x="14" y="56" class="box-body">Transparent refresh-then-retry on 401</text>
+    </g>
+
+    <g transform="translate(60, 586)">
+      <rect width="340" height="50" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Local storage</text>
+      <text x="14" y="40" class="box-mono">access_token · refresh_token</text>
+    </g>
+
+    <!-- Bottom tag -->
+    <text x="230" y="720" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">Served as static assets</text>
+    <text x="230" y="735" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">via any HTTP server (Nginx)</text>
+  </g>
+
+  <!-- ===========================================================
+       TIER 2: APPLICATION (Flask)
+       =========================================================== -->
+  <g>
+    <rect x="450" y="100" width="380" height="660" rx="14" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+
+    <rect x="450" y="100" width="380" height="40" rx="14" fill="#8B5CF6"/>
+    <rect x="450" y="126" width="380" height="14" fill="#8B5CF6"/>
+    <text x="470" y="126" class="tier-label">Application Tier</text>
+
+    <text x="470" y="170" class="tier-name">Flask REST API</text>
+    <text x="470" y="188" class="tier-tech">Python 3.11 · Flask 3.0 · SQLAlchemy 2</text>
+
+    <!-- App factory -->
+    <g transform="translate(470, 210)">
+      <rect width="340" height="48" rx="8" fill="#fff" stroke="#8B5CF6" stroke-width="2"/>
+      <text x="14" y="22" class="box-title">Application factory · create_app()</text>
+      <text x="14" y="38" class="box-body">Config (Dev/Test/Prod) · Extensions · Blueprints</text>
+    </g>
+
+    <!-- Middleware -->
+    <g transform="translate(470, 270)">
+      <rect width="340" height="48" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Middleware</text>
+      <text x="14" y="38" class="box-body">CORS · JWT verification · per-user isolation</text>
+    </g>
+
+    <!-- API Blueprints -->
+    <text x="470" y="350" class="box-title">REST endpoints (8 blueprints)</text>
+
+    <g transform="translate(470, 360)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/auth</text>
+      <text x="10" y="30" font-size="10" fill="#475569">register · login · refresh</text>
+    </g>
+    <g transform="translate(646, 360)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/accounts</text>
+      <text x="10" y="30" font-size="10" fill="#475569">CRUD · summary</text>
+    </g>
+    <g transform="translate(470, 404)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/transactions</text>
+      <text x="10" y="30" font-size="10" fill="#475569">CRUD · filters · bulk-delete</text>
+    </g>
+    <g transform="translate(646, 404)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/categories</text>
+      <text x="10" y="30" font-size="10" fill="#475569">CRUD · tree</text>
+    </g>
+    <g transform="translate(470, 448)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/budgets</text>
+      <text x="10" y="30" font-size="10" fill="#475569">CRUD · progress</text>
+    </g>
+    <g transform="translate(646, 448)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/goals</text>
+      <text x="10" y="30" font-size="10" fill="#475569">CRUD · contribute</text>
+    </g>
+    <g transform="translate(470, 492)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/reports</text>
+      <text x="10" y="30" font-size="10" fill="#475569">summary · series · csv</text>
+    </g>
+    <g transform="translate(646, 492)">
+      <rect width="164" height="36" rx="6" fill="#fff" stroke="#E2E8F0"/>
+      <text x="10" y="16" font-size="11" font-weight="600" fill="#0f172a">/api/imports</text>
+      <text x="10" y="30" font-size="10" fill="#475569">csv · preview</text>
+    </g>
+
+    <!-- Services -->
+    <g transform="translate(470, 552)">
+      <rect width="340" height="60" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Business logic services</text>
+      <text x="14" y="40" class="box-body">analytics.py · csv_parser.py</text>
+      <text x="14" y="54" class="box-mono">DB-side aggregation · SHA-256 dedup</text>
+    </g>
+
+    <!-- Models / ORM -->
+    <g transform="translate(470, 622)">
+      <rect width="340" height="68" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">SQLAlchemy ORM models (7 entities)</text>
+      <text x="14" y="40" class="box-body">User · Account · Category · Tag</text>
+      <text x="14" y="56" class="box-body">Transaction · Budget · Goal</text>
+    </g>
+
+    <text x="640" y="720" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">Stateless · horizontally scalable</text>
+    <text x="640" y="735" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">behind Gunicorn workers</text>
+  </g>
+
+  <!-- ===========================================================
+       TIER 3: DATA (PostgreSQL)
+       =========================================================== -->
+  <g>
+    <rect x="860" y="100" width="340" height="660" rx="14" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+
+    <rect x="860" y="100" width="340" height="40" rx="14" fill="#10B981"/>
+    <rect x="860" y="126" width="340" height="14" fill="#10B981"/>
+    <text x="880" y="126" class="tier-label">Data Tier</text>
+
+    <text x="880" y="170" class="tier-name">PostgreSQL 15</text>
+    <text x="880" y="188" class="tier-tech">Relational · 3NF · with controlled denormalization</text>
+
+    <!-- DB cylinder -->
+    <g transform="translate(990, 220)">
+      <ellipse cx="40" cy="10" rx="40" ry="10" fill="#10B981"/>
+      <rect x="0" y="10" width="80" height="80" fill="#10B981"/>
+      <ellipse cx="40" cy="90" rx="40" ry="10" fill="#059669"/>
+      <ellipse cx="40" cy="10" rx="40" ry="10" fill="none" stroke="#059669" stroke-width="1.5"/>
+      <ellipse cx="40" cy="40" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="1" opacity="0.6"/>
+      <ellipse cx="40" cy="70" rx="40" ry="10" fill="none" stroke="#fff" stroke-width="1" opacity="0.6"/>
+    </g>
+
+    <!-- Tables -->
+    <g transform="translate(880, 340)">
+      <rect width="300" height="240" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Tables (8 total)</text>
+
+      <g transform="translate(0, 36)">
+        <rect width="300" height="22" fill="#F8FAFC"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">users</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">PK · indexed email</text>
+      </g>
+      <g transform="translate(0, 60)">
+        <rect width="300" height="22" fill="#fff"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">accounts</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">CASCADE on user</text>
+      </g>
+      <g transform="translate(0, 84)">
+        <rect width="300" height="22" fill="#F8FAFC"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">categories</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">self-ref hierarchy</text>
+      </g>
+      <g transform="translate(0, 108)">
+        <rect width="300" height="22" fill="#fff"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">tags</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">unique per user</text>
+      </g>
+      <g transform="translate(0, 132)">
+        <rect width="300" height="22" fill="#F8FAFC"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">transactions</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">indexed: user+date</text>
+      </g>
+      <g transform="translate(0, 156)">
+        <rect width="300" height="22" fill="#fff"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">budgets</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">CHECK amount &gt; 0</text>
+      </g>
+      <g transform="translate(0, 180)">
+        <rect width="300" height="22" fill="#F8FAFC"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-weight="500">goals</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">CHECK target &gt; 0</text>
+      </g>
+      <g transform="translate(0, 204)">
+        <rect width="300" height="22" fill="#fff"/>
+        <text x="14" y="16" font-size="11" fill="#475569" font-style="italic">transaction_tags</text>
+        <text x="286" y="16" text-anchor="end" font-size="10" fill="#94a3b8" font-family="JetBrains Mono">M:N junction</text>
+      </g>
+    </g>
+
+    <!-- Constraints -->
+    <g transform="translate(880, 596)">
+      <rect width="300" height="60" rx="8" fill="#fff" stroke="#E2E8F0"/>
+      <text x="14" y="22" class="box-title">Constraints &amp; integrity</text>
+      <text x="14" y="38" class="box-body">CHECK constraints · FK CASCADE</text>
+      <text x="14" y="54" class="box-body">Event-hook balance maintenance</text>
+    </g>
+
+    <text x="1030" y="720" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">Connection pool · pool_pre_ping</text>
+    <text x="1030" y="735" text-anchor="middle" font-size="11" fill="#64748b" font-style="italic">Daily backups recommended</text>
+  </g>
+
+  <!-- ===========================================================
+       INTER-TIER FLOWS
+       =========================================================== -->
+
+  <!-- React → Flask -->
+  <line x1="420" y1="430" x2="450" y2="430" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="450" y1="450" x2="420" y2="450" stroke="#3B82F6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <g transform="translate(385, 390)">
+    <rect width="100" height="30" rx="6" fill="#EFF6FF" stroke="#3B82F6"/>
+    <text x="50" y="14" text-anchor="middle" font-size="10" fill="#1E40AF" font-weight="600">HTTPS</text>
+    <text x="50" y="25" text-anchor="middle" font-size="9" fill="#1E40AF" font-family="JetBrains Mono">JSON · JWT</text>
+  </g>
+
+  <!-- Flask → PostgreSQL -->
+  <line x1="830" y1="430" x2="860" y2="430" stroke="#10B981" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="860" y1="450" x2="830" y2="450" stroke="#10B981" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <g transform="translate(795, 390)">
+    <rect width="100" height="30" rx="6" fill="#ECFDF5" stroke="#10B981"/>
+    <text x="50" y="14" text-anchor="middle" font-size="10" fill="#047857" font-weight="600">SQL</text>
+    <text x="50" y="25" text-anchor="middle" font-size="9" fill="#047857" font-family="JetBrains Mono">psycopg2 · pool</text>
+  </g>
+
+  <!-- ===========================================================
+       AUTHENTICATION FLOW callout
+       =========================================================== -->
+  <g transform="translate(40, 790)">
+    <rect width="1160" height="74" rx="10" fill="#fff" stroke="#E2E8F0"/>
+    <text x="20" y="24" font-size="13" font-weight="700" fill="#0f172a">Authentication flow:</text>
+
+    <g transform="translate(180, 14)">
+      <rect width="120" height="30" rx="6" fill="#FEF3C7"/>
+      <text x="60" y="20" text-anchor="middle" font-size="11" fill="#92400E" font-weight="600">1. POST /login</text>
+      <text x="60" y="56" text-anchor="middle" font-size="10" fill="#64748b">email + password</text>
+    </g>
+
+    <line x1="305" y1="29" x2="335" y2="29" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <g transform="translate(340, 14)">
+      <rect width="150" height="30" rx="6" fill="#DBEAFE"/>
+      <text x="75" y="20" text-anchor="middle" font-size="11" fill="#1E3A8A" font-weight="600">2. Verify bcrypt hash</text>
+      <text x="75" y="56" text-anchor="middle" font-size="10" fill="#64748b">constant-time</text>
+    </g>
+
+    <line x1="495" y1="29" x2="525" y2="29" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <g transform="translate(530, 14)">
+      <rect width="150" height="30" rx="6" fill="#EDE9FE"/>
+      <text x="75" y="20" text-anchor="middle" font-size="11" fill="#5B21B6" font-weight="600">3. Issue JWT pair</text>
+      <text x="75" y="56" text-anchor="middle" font-size="10" fill="#64748b">access 1h + refresh 30d</text>
+    </g>
+
+    <line x1="685" y1="29" x2="715" y2="29" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <g transform="translate(720, 14)">
+      <rect width="170" height="30" rx="6" fill="#FCE7F3"/>
+      <text x="85" y="20" text-anchor="middle" font-size="11" fill="#9D174D" font-weight="600">4. Client stores tokens</text>
+      <text x="85" y="56" text-anchor="middle" font-size="10" fill="#64748b">localStorage</text>
+    </g>
+
+    <line x1="895" y1="29" x2="925" y2="29" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <g transform="translate(930, 14)">
+      <rect width="210" height="30" rx="6" fill="#D1FAE5"/>
+      <text x="105" y="20" text-anchor="middle" font-size="11" fill="#065F46" font-weight="600">5. Authorization: Bearer …</text>
+      <text x="105" y="56" text-anchor="middle" font-size="10" fill="#64748b">on every subsequent API call</text>
+    </g>
+  </g>
+</svg>

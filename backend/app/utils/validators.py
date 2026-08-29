@@ -1,12 +1,3 @@
-"""
-Lightweight validation helpers.
-
-A full schema library was considered and deliberately avoided: the input
-shapes here are small and stable, and a couple of dozen lines of explicit
-helpers is clearer than configuring a schema per endpoint. Each helper
-raises ValidationError, which the API layer maps to HTTP 400 with the
-offending field named.
-"""
 import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation

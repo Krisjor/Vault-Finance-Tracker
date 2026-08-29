@@ -1,10 +1,5 @@
 /**
  * AuthContext.
- *
- * Holds the current user and login/logout/register actions. Components
- * subscribe via the `useAuth()` hook rather than reaching into localStorage
- * directly. On mount, attempts to hydrate the session from a stored access
- * token so a refresh doesn't kick the user back to /login.
  */
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { auth as authApi, tokenStore } from '../services/api.js'

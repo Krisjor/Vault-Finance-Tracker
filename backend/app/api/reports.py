@@ -1,9 +1,3 @@
-"""
-Reports endpoints.
-
-Thin HTTP layer over the analytics service. CSV export is implemented
-directly here since it streams data rather than returning JSON.
-"""
 import csv
 import io
 from datetime import date, timedelta

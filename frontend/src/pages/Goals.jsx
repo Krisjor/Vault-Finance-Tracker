@@ -1,9 +1,5 @@
 /**
  * Goals — savings goals with progress bars and contribute action.
- *
- * Visual treatment matches the offline demo: each goal is a card with a
- * faint colored "halo" disc in the top-right, large italic display of
- * current amount, and a prominent amber "Add contribution" button.
  */
 import { useEffect, useState } from 'react'
 import { Plus, Trash2, Pencil, Target } from 'lucide-react'

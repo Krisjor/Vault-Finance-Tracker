@@ -1,10 +1,3 @@
-"""
-Database models for the Personal Finance Tracker.
-
-All models inherit from `db.Model` (SQLAlchemy declarative base).
-Re-exported here so importing `from app.models import User, ...` works
-and so Flask-Migrate detects every table via autogenerate.
-"""
 from .user import User
 from .account import Account, AccountType
 from .category import Category, CategoryType

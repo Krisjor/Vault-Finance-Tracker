@@ -1,9 +1,3 @@
-"""
-Application configuration loaded from environment variables.
-
-Defines three configurations: Development, Testing, Production.
-Selected at runtime via the FLASK_ENV environment variable.
-"""
 import os
 from datetime import timedelta
 from dotenv import load_dotenv

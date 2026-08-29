@@ -1,10 +1,3 @@
-"""
-Budgets endpoints.
-
-Budgets cap spending per category over a period (monthly by default).
-The `progress` payload is what powers warning bars in the UI; it's
-recomputed on every read so we don't need to maintain stored totals.
-"""
 from datetime import date
 from flask import Blueprint, jsonify, request
 

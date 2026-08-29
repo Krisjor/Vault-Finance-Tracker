@@ -52,9 +52,6 @@ def _auth_header(client, user):
     }
 
 
-# ---------------------------------------------------------------------------
-# Test 12
-# ---------------------------------------------------------------------------
 
 def test_csv_preview_comma_delimited(client, db):
     """Test 12: Detect a comma-separated CSV statement."""
@@ -86,10 +83,6 @@ def test_csv_preview_comma_delimited(client, db):
     ]
 
 
-# ---------------------------------------------------------------------------
-# Test 13
-# ---------------------------------------------------------------------------
-
 def test_csv_preview_semicolon_delimited(client, db):
     """Test 13: Detect a semicolon-separated CSV statement."""
     user, account = _create_test_user_and_account(db)
@@ -115,9 +108,7 @@ def test_csv_preview_semicolon_delimited(client, db):
     assert response.json["delimiter"] == ";"
 
 
-# ---------------------------------------------------------------------------
-# Test 14
-# ---------------------------------------------------------------------------
+
 
 def test_csv_date_parsing_formats(client, db):
     """
@@ -176,9 +167,7 @@ def test_csv_date_parsing_formats(client, db):
         assert transaction.transaction_date.isoformat() == "2026-07-15"
 
 
-# ---------------------------------------------------------------------------
-# Test 15
-# ---------------------------------------------------------------------------
+
 
 def test_csv_amount_parsing_locales(client, db):
     """
@@ -217,7 +206,7 @@ def test_csv_amount_parsing_locales(client, db):
 
         description = f"Locale Test {index}"
 
-        # Amount is quoted because values such as 1,234.56 contain a comma.
+        
         csv_text = (
             'Date,Amount,Description\n'
             f'15/07/2026,"{amount_str}",{description}\n'
@@ -254,9 +243,7 @@ def test_csv_amount_parsing_locales(client, db):
         assert transaction.transaction_type.value == expected_type
 
 
-# ---------------------------------------------------------------------------
-# Test 16
-# ---------------------------------------------------------------------------
+
 
 def test_csv_import_sha256_deduplication(client, db):
     """
@@ -292,7 +279,7 @@ def test_csv_import_sha256_deduplication(client, db):
     assert first_response.json["inserted"] == 1
     assert first_response.json["skipped_duplicates"] == 0
 
-    # Second import: identical transaction should be skipped.
+  
     second_response = client.post(
         "/api/imports/csv",
         json=payload,

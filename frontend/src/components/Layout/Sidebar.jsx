@@ -1,8 +1,5 @@
 /**
  * Sidebar — fixed-width navigation rail.
- *
- * Visual treatment matches the offline demo (cream background, ink-900 active
- * pill with an amber-stroked icon, "Vault" brand block on top).
  */
 import { NavLink } from 'react-router-dom'
 import {
@@ -23,7 +20,7 @@ const NAV = [
   { to: '/settings',     label: 'Settings',     icon: Settings },
 ]
 
-// The "Vault" mark — same paths used in the offline demo + favicon.
+
 function VaultMark() {
   return (
     <div className="w-8 h-8 rounded-lg bg-ink-900 grid place-items-center shrink-0">

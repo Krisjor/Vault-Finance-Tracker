@@ -1,18 +1,3 @@
-"""
-Transaction model.
-
-The single most important table in the system. Each transaction belongs to
-one user, one account, optionally one category, optionally many tags.
-
-Transactions can be:
-    - INCOME    (money entering an account: salary, gifts, refunds)
-    - EXPENSE   (money leaving an account: groceries, rent, gas)
-    - TRANSFER  (movement between two accounts; appears as both an expense
-                 on the source and an income on the destination via paired records)
-
-Amounts are always positive Decimals; the sign is implied by `transaction_type`.
-This avoids the bookkeeping mess of mixed-sign columns.
-"""
 import enum
 from datetime import datetime, date as date_cls
 from decimal import Decimal

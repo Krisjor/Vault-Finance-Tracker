@@ -1,11 +1,5 @@
 /**
  * Dashboard — landing page after login.
- *
- * Pulls the /reports/summary aggregate payload and lays out:
- *   - top stat cards (income / expense / net / avg daily spend)
- *   - monthly trend bar chart
- *   - spending-by-category donut
- *   - account summaries + recent transactions feed
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'

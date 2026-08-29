@@ -1,10 +1,5 @@
 /**
  * Top-level app component.
- *
- * Decides whether to show the public auth pages or the authenticated app
- * shell based on the AuthContext state. ProtectedRoute redirects to
- * /login when there's no user, and shows a brief loading state during
- * session hydration.
  */
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext.jsx'

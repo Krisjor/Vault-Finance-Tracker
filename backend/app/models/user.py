@@ -1,9 +1,3 @@
-"""
-User model.
-
-Stores authentication credentials and per-user preferences (default currency,
-locale). Passwords are hashed with bcrypt — the plaintext is never stored.
-"""
 from datetime import datetime
 from ..extensions import db, bcrypt
 

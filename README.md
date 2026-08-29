@@ -62,18 +62,6 @@ npm install
 npm run dev                # → http://localhost:5173
 ```
 
-## Live demo (no setup)
-
-The standalone demo at `demo/index.html` runs in any modern browser with no backend, no build tooling, no database. State is persisted in `localStorage`. Useful for thesis defences and stakeholder demos.
-
-```bash
-# macOS
-open demo/index.html
-# Linux
-xdg-open demo/index.html
-# Windows
-start demo/index.html
-```
 
 ## Features
 

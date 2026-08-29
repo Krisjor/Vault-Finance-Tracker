@@ -1,13 +1,3 @@
-"""
-Budget model.
-
-A budget is a monthly cap on spending for a specific expense category.
-Multiple period flavors are supported (monthly, yearly) but monthly is
-overwhelmingly the common case.
-
-The `progress()` method computes spent-vs-limit for a given period —
-this is what drives the dashboard warning bars and notification triggers.
-"""
 import enum
 from datetime import datetime, date
 from decimal import Decimal

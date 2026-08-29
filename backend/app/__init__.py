@@ -1,10 +1,3 @@
-"""
-Application factory.
-
-Following the Flask app-factory pattern lets us instantiate the app
-with different configurations (dev/test/prod) without touching code.
-"""
-import os
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
 

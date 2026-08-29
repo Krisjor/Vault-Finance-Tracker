@@ -1,9 +1,5 @@
 /**
  * Reports — multi-chart analytics view with date range, CSV export.
- *
- * Visual treatment matches the offline demo: range selector + export
- * button in the header, then four chart cards (daily spending area,
- * net worth line, spending by category, top merchants).
  */
 import { useEffect, useState } from 'react'
 import {

@@ -1,13 +1,3 @@
-"""
-Transactions endpoints.
-
-The most heavily-used CRUD in the system. Supports:
-    - listing with rich filters (date range, account, category, type, search)
-    - paginated results with total/page metadata
-    - creating income, expense, and transfer transactions
-    - tag attachment/detachment
-    - bulk delete
-"""
 from datetime import datetime, date
 from decimal import Decimal
 

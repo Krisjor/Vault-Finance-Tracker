@@ -1,13 +1,3 @@
-"""
-Category model.
-
-Categories classify transactions for budgeting and reporting. Two flavors:
-    - EXPENSE  ("Groceries", "Rent", "Utilities", ...)
-    - INCOME   ("Salary", "Gifts", "Investments", ...)
-
-Supports nested categories (e.g. Food → Groceries / Restaurants) via
-self-referential parent_id so the UI can show grouped pie charts.
-"""
 import enum
 from datetime import datetime
 from ..extensions import db

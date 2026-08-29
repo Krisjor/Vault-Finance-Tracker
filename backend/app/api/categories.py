@@ -1,10 +1,3 @@
-"""
-Categories endpoints.
-
-Categories are scoped to a user. System (seeded) categories can be archived
-by the user but not deleted, so that historical transactions retain their
-classification even after a category is no longer in use.
-"""
 from flask import Blueprint, jsonify, request
 
 from ..extensions import db

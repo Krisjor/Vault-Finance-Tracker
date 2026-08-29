@@ -1,11 +1,3 @@
-"""
-Account model.
-
-Represents a financial account a user holds — checking, savings, credit card,
-cash wallet, or investment. Each account has its own currency; transactions
-recorded against it are stored in that currency and converted at report time
-if a user requests cross-account totals.
-"""
 import enum
 from datetime import datetime
 from decimal import Decimal

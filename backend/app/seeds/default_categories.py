@@ -1,9 +1,3 @@
-"""
-Seeds default categories for new users.
-
-Run automatically on registration so new users have something to categorize
-against immediately. The user can archive any they don't want.
-"""
 from ..extensions import db
 from ..models import Category, CategoryType
 

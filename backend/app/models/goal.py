@@ -1,10 +1,3 @@
-"""
-Goal model.
-
-A savings goal — e.g. "Save 500,000 ALL for a new laptop by December".
-The user picks one or more accounts whose total balance contributes toward
-the goal. When that total meets `target_amount`, the goal is marked complete.
-"""
 from datetime import datetime, date
 from decimal import Decimal
 

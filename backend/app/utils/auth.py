@@ -1,9 +1,3 @@
-"""
-Auth helpers.
-
-Provides `current_user()` which loads the User row corresponding to the JWT
-identity in the current request. Avoids repeating that lookup in every view.
-"""
 from functools import wraps
 from flask import jsonify
 from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request

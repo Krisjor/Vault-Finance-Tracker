@@ -31,7 +31,7 @@
     @apply bg-white rounded-xl border border-cream-200 p-4;
   }
 
-  /* Buttons — match the demo's pill style */
+
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
            font-medium text-sm transition-all duration-150
@@ -75,7 +75,7 @@
     @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /* "Live demo" pill on the dashboard */
+ 
   .demo-pill {
     @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full
            text-[11px] font-semibold uppercase tracking-wider;

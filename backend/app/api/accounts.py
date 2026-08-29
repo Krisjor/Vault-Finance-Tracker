@@ -1,9 +1,3 @@
-"""
-Accounts endpoints.
-
-CRUD over a user's financial accounts. All routes are scoped to the
-authenticated user — no admin / cross-tenant access exists by design.
-"""
 from flask import Blueprint, jsonify, request
 
 from ..extensions import db

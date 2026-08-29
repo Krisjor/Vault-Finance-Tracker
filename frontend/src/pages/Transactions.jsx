@@ -1,9 +1,5 @@
 /**
  * Transactions — filterable list with create/edit/delete.
- *
- * Visual treatment matches the offline demo: transactions are grouped by
- * date with a "day header" showing the day's net, and edit/delete actions
- * appear on row hover.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Pencil, Trash2, ArrowUpRight, ArrowDownRight, Check, X } from 'lucide-react'

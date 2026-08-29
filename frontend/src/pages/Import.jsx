@@ -1,9 +1,5 @@
 /**
  * Import — upload a bank CSV, map columns, import into a destination account.
- *
- * Visual treatment matches the offline demo: large "Drop your CSV here"
- * empty-state card, then a Step 2 mapping card with preview table on the
- * left and an "How importing works" aside on the right.
  */
 import { useEffect, useState } from 'react'
 import { Upload, Check } from 'lucide-react'

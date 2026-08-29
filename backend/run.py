@@ -23,19 +23,7 @@ app = create_app(os.getenv("FLASK_ENV", "development"))
 @app.cli.command("seed-demo")
 @with_appcontext
 def seed_demo():
-    """
-    Populate the database with the SAME accounts / categories / transactions /
-    budgets / goals that the standalone offline demo (`demo/index-offline.html`)
-    generates.
 
-    The data is produced by faithfully porting the demo's deterministic
-    linear-congruential RNG (seed=42, x' = (9301*x + 49297) mod 233280) to
-    Python, so the random expenses match the demo entry-for-entry when both
-    are seeded on the same day.
-
-    Idempotent: if the demo user already exists, the command exits without
-    touching the database.
-    """
     import math
     from datetime import date, timedelta
     from decimal import Decimal

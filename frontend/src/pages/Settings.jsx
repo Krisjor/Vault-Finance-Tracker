@@ -1,9 +1,5 @@
 /**
- * Settings — user profile + password + about/danger zone.
- *
- * Visual treatment matches the offline demo: two-column layout with the
- * profile form on the left and "About" + "Danger zone" cards stacked
- * on the right.
+ * Settings 
  */
 import { useState } from 'react'
 import { Trash2 } from 'lucide-react'

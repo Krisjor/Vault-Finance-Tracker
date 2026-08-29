@@ -1,9 +1,5 @@
 /**
  * Categories — view, add, edit, archive user's categories.
- *
- * Visual treatment matches the offline demo: a compact pill-style tab
- * row (expense / income), then a divided list of category items with
- * hover actions. System categories can only be archived.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Pencil, Archive, Trash2 } from 'lucide-react'

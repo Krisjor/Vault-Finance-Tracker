@@ -1,9 +1,5 @@
 /**
  * Accounts page — list, create, edit, archive accounts.
- *
- * Layout follows the offline demo: a "Net worth" hero card on top showing
- * totals per currency (intentionally not converted), then a grid of account
- * cards with monthly-change indicator and hover actions.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Pencil, Archive, Trash2 } from 'lucide-react'

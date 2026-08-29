@@ -1,16 +1,3 @@
-"""
-CSV parser service.
-
-A generic CSV bank-statement importer. The user supplies a column mapping
-(which CSV column corresponds to date, amount, description, etc.) and we
-emit Transaction-ready dicts that the imports API can persist.
-
-We deliberately don't hard-code per-bank parsers. Albanian banks (BKT,
-Raiffeisen Albania, Credins, Tirana Bank) all use slightly different
-statement formats and that's a moving target. A configurable mapping is
-both more flexible and a better thesis demonstration of data-cleaning
-pipelines than 5 brittle parsers.
-"""
 import csv
 import hashlib
 import io
@@ -139,19 +126,7 @@ def parse_csv(
     default_account_id: int,
     default_currency: str = "ALL",
 ) -> Iterator[dict]:
-    """
-    Parse a CSV using the given column mapping and yield transaction dicts.
 
-    The mapping dict keys (all strings — they're CSV header names):
-        date_col           required
-        amount_col         required
-        description_col    optional
-        type_col           optional, with values 'income_value'/'expense_value' set
-        amount_sign        'negative_is_expense' (default) | 'positive_is_expense'
-
-    Yields dicts shaped for direct ingestion by the transactions API.
-    Each yielded dict carries an `import_hash` so re-imports can dedupe.
-    """
     sample = text[:4096]
     dialect = detect_dialect(sample)
 

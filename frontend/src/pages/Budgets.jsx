@@ -1,9 +1,5 @@
 /**
  * Budgets — list + create + edit + delete budgets.
- *
- * Visual treatment matches the offline demo: each budget is a wide card
- * with category icon-disc, spent/limit on the right, and a colored
- * progress bar below.
  */
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Sliders } from 'lucide-react'

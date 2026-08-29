@@ -1,9 +1,3 @@
-"""
-CSV Import endpoints.
-
-    POST /api/imports/csv/preview – first 5 rows + detected headers
-    POST /api/imports/csv          – persist mapped transactions
-"""
 from flask import Blueprint, jsonify, request
 
 from ..extensions import db

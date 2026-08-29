@@ -1,12 +1,3 @@
-"""
-Auth endpoints.
-
-    POST  /api/auth/register   – create a new account
-    POST  /api/auth/login      – exchange credentials for access+refresh tokens
-    POST  /api/auth/refresh    – swap a refresh token for a new access token
-    GET   /api/auth/me         – return the current user
-    POST  /api/auth/logout     – client-side token disposal (stateless JWT)
-"""
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import (

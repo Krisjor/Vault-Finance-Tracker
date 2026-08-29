@@ -1,10 +1,3 @@
-"""
-Tag model.
-
-Tags are user-defined freeform labels (e.g. "vacation", "tax-deductible",
-"shared-with-partner"). Many-to-many with transactions, complementing the
-single-category-per-transaction scheme.
-"""
 from datetime import datetime
 from ..extensions import db
 
